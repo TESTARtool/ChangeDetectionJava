@@ -15,6 +15,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     implementation 'com.orientechnologies:orientdb-client:3.0.34'
     implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'org.mockito:mockito-all:1.10.19'
 }
 
 test {
