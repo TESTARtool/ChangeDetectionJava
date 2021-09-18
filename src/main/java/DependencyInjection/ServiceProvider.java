@@ -1,6 +1,5 @@
 package DependencyInjection;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,28 +23,6 @@ public class ServiceProvider {
         return result.get();
     }
 
-    private Object createInstance(ServiceDescriptor serviceDescriptor) throws Exception {
-        var implementation = serviceDescriptor.getImplementationType();
-        var constructors = implementation.getConstructors();
-        var parametersLists = Arrays.stream(constructors)
-                .map(x -> x.getParameterTypes())
-                .sorted((x1, x2) -> x1.length - x2.length)
-                .collect(Collectors.toList());
-
-        var parameters = parametersLists.get(0);
-        var resolvedItems = new Object[parameters.length];
-        for (var i = 0; i < parameters.length; i++){
-            try {
-                var instance = getService(parameters[i]);
-                resolvedItems[i] = instance;
-            } catch (Exception ex) {
-                throw new FailedServiceException(parameters[i].getName());
-            }
-        }
-
-        return implementation.getDeclaredConstructor(parameters).newInstance(resolvedItems);
-    }
-
     public <TInterface> TInterface getService(Class<TInterface> interfaceType) throws IllegalStateException{
         var serviceDescriptor = getServiceDescriptor(interfaceType);
 
@@ -66,7 +43,32 @@ public class ServiceProvider {
         }
     }
 
-    private class FailedServiceException extends Exception{
+    private Object createInstance(ServiceDescriptor serviceDescriptor) throws Exception {
+        var implementation = serviceDescriptor.getImplementationType();
+        var constructors = implementation.getConstructors();
+        var parametersLists = Arrays.stream(constructors)
+                .map(x -> x.getParameterTypes())
+                .sorted((x1, x2) -> x1.length - x2.length)
+                .collect(Collectors.toList());
+
+        var parameters = parametersLists.get(0);
+
+        var resolvedItems = Arrays.stream(parameters)
+                .map(this::mapServiceToInstance)
+                .toArray();
+
+        return implementation.getDeclaredConstructor(parameters).newInstance(resolvedItems);
+    }
+
+    private Object mapServiceToInstance(Class<?> x) {
+        try {
+             return getService(x);
+        } catch (Exception ex) {
+            throw new FailedServiceException(x.getName());
+        }
+    }
+
+    private class FailedServiceException extends RuntimeException{
         private final String failedService;
 
         public FailedServiceException(String failedService){
