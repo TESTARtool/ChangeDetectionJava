@@ -1,6 +1,6 @@
-package Models;
+package modeldifference.models;
 
-public class StateId{
+public class StateId implements IIdentifier{
     public static final String PROPERTY_NAME = "stateId";
 
     private String value;

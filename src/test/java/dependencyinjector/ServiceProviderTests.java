@@ -1,6 +1,6 @@
-package DependencyInjector;
+package dependencyinjector;
 
-import DependencyInjection.ServiceProviderBuilder;
+import dependencyinjection.ServiceProviderBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +11,7 @@ public class ServiceProviderTests {
     @Test
     public void getServiceThrowsExceptionWhenTypeIsNotRegistered(){
         var sut = new ServiceProviderBuilder()
-                .BuildServiceProvider();
+                .buildServiceProvider();
 
         var exception = assertThrows(IllegalStateException.class, () -> {
             sut.getService(String.class);
@@ -27,7 +27,7 @@ public class ServiceProviderTests {
         var sut = new ServiceProviderBuilder()
                 .addSingleton(ITestInterface.class, TestClass.class)
                 .addSingleton(ISecondTestInterface.class, SecondTestClass.class)
-                .BuildServiceProvider();
+                .buildServiceProvider();
 
         var service = (TestClass) sut.getService(ITestInterface.class);
 
@@ -39,7 +39,7 @@ public class ServiceProviderTests {
     public void whenUnableToCreateInstanceTheFailedServiceIsNamedInTheException(){
         var sut2 = new ServiceProviderBuilder()
                 .addSingleton(ISecondTestInterface.class, SecondTestClass.class)
-                .BuildServiceProvider();
+                .buildServiceProvider();
 
         var exception = assertThrows(IllegalStateException.class, () -> {
             sut2.getService(ISecondTestInterface.class);

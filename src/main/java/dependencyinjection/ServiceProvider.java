@@ -1,5 +1,6 @@
-package DependencyInjection;
+package dependencyinjection;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,15 +24,15 @@ public class ServiceProvider {
         return result.get();
     }
 
-    public <TInterface> TInterface getService(Class<TInterface> interfaceType) throws IllegalStateException{
+    public <I> I getService(Class<I> interfaceType) throws IllegalStateException{
         var serviceDescriptor = getServiceDescriptor(interfaceType);
 
         if (serviceDescriptor.hasInstance()) {
-            return (TInterface) serviceDescriptor.getInstance();
+            return (I) serviceDescriptor.getInstance();
         }
 
         try {
-            var instance = (TInterface) createInstance(serviceDescriptor);
+            var instance = (I) createInstance(serviceDescriptor);
             serviceDescriptor.setInstance(instance);
             return instance;
         }
@@ -43,7 +44,8 @@ public class ServiceProvider {
         }
     }
 
-    private Object createInstance(ServiceDescriptor serviceDescriptor) throws Exception {
+    private Object createInstance(ServiceDescriptor serviceDescriptor)
+            throws NoSuchMethodException, SecurityException,InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         var implementation = serviceDescriptor.getImplementationType();
         var constructors = implementation.getConstructors();
         var parametersLists = Arrays.stream(constructors)

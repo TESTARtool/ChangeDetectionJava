@@ -1,9 +1,6 @@
-package Models;
+package modeldifference.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class ModelIdentifier {
+public class ModelIdentifier implements IIdentifier {
     public static final String PROPERTY_NAME = "modelIdentifier";
     private String value;
 

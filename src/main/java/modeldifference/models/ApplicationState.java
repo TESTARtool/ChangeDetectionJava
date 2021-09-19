@@ -1,4 +1,4 @@
-package Models;
+package modeldifference.models;
 
 public class ApplicationState {
     private StateId id;

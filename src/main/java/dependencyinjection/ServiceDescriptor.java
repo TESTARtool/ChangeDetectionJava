@@ -1,4 +1,4 @@
-package DependencyInjection;
+package dependencyinjection;
 import java.util.Optional;
 
 public class ServiceDescriptor{
@@ -8,14 +8,14 @@ public class ServiceDescriptor{
     private final ServiceLifetime lifetime;
     private Optional<Object> instance;
 
-    public <TInterface, TImplementation extends TInterface> ServiceDescriptor(Class<TInterface> interfaceType, Class<TImplementation> implementationType, ServiceLifetime lifetime){
+    public <I, T extends I> ServiceDescriptor(Class<I> interfaceType, Class<T> implementationType, ServiceLifetime lifetime){
         this.interfaceType = interfaceType;
         this.implementationType = implementationType;
         this.lifetime = lifetime;
         this.instance = Optional.empty();
     }
 
-    public <TInterface, TImplementation extends TInterface> ServiceDescriptor (Class<TInterface> interfaceType, TImplementation implementation ){
+    public <I, T extends I> ServiceDescriptor (Class<I> interfaceType, T implementation ){
         this.interfaceType = interfaceType;
         this.implementationType = implementation.getClass();
         this.lifetime = ServiceLifetime.SINGLETON;

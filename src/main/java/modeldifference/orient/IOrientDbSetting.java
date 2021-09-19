@@ -1,3 +1,5 @@
+package modeldifference.orient;
+
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 
 public interface IOrientDbSetting {

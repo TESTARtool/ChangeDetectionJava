@@ -1,4 +1,6 @@
-import Models.Application;
+package modeldifference;
+
+import modeldifference.models.Application;
 
 import java.util.Optional;
 

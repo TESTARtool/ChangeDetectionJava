@@ -1,4 +1,4 @@
-package DependencyInjector;
+package dependencyinjector;
 
     public class TestClass implements ITestInterface{
 

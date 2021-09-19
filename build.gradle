@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id "org.sonarqube" version "3.3"
 }
 
 group 'nl.ou.testar'
@@ -20,4 +21,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "model-difference"
+        property "sonar.organization", "rn-study"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
 }

@@ -1,4 +1,4 @@
-package DependencyInjection;
+package dependencyinjection;
 
 public enum ServiceLifetime {
     SINGLETON,
