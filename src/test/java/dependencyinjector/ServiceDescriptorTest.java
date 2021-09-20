@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ServiceDescriptorTest {
+class ServiceDescriptorTest {
 
     @Test
-    public void creatingAServiceDescriptorWithObjectLifeTimeIsSINGLETON(){
+    void creatingAServiceDescriptorWithObjectLifeTimeIsSINGLETON(){
         var sut = new ServiceDescriptor(ITestInterface.class, new TestClass());
 
         var expected = ServiceLifetime.SINGLETON;
@@ -19,7 +19,7 @@ public class ServiceDescriptorTest {
     }
 
     @Test
-    public void havingATRANSIENTDescriptorSetInstanceDoesNotSaveTheObject(){
+    void havingATRANSIENTDescriptorSetInstanceDoesNotSaveTheObject(){
         var sut = new ServiceDescriptor(ITestInterface.class, TestClass.class, ServiceLifetime.TRANSIENT);
         var testInstance = new TestClass();
 
@@ -29,7 +29,7 @@ public class ServiceDescriptorTest {
     }
 
     @Test
-    public void havingASINGLETONDescriptionsSetInstanceSavedValues(){
+    void havingASINGLETONDescriptionsSetInstanceSavedValues(){
         var sut = new ServiceDescriptor(ITestInterface.class, TestClass.class, ServiceLifetime.SINGLETON);
         var testInstance = new TestClass();
 
@@ -41,17 +41,19 @@ public class ServiceDescriptorTest {
     }
 
     @Test
-    public void setInstanceWhenAlreadyHaveAnInstanceThrowsException(){
+    void setInstanceWhenAlreadyHaveAnInstanceThrowsException(){
         var sut = new ServiceDescriptor(ITestInterface.class, TestClass.class, ServiceLifetime.SINGLETON);
         sut.setInstance(new TestClass());
 
+        var newInstance = new TestClass();
+
         assertThrows(IllegalStateException.class, () -> {
-            sut.setInstance(new TestClass());
+            sut.setInstance(newInstance);
         });
     }
 
     @Test
-    public void getInstanceWithoutInstanceThrowsException(){
+    void getInstanceWithoutInstanceThrowsException(){
         var sut = new ServiceDescriptor(ITestInterface.class, TestClass.class, ServiceLifetime.SINGLETON);
 
         assertThrows(IllegalStateException.class, () -> {

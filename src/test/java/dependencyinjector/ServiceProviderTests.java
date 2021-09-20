@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class ServiceProviderTests {
+class ServiceProviderTests {
 
     @Test
-    public void getServiceThrowsExceptionWhenTypeIsNotRegistered(){
+    void getServiceThrowsExceptionWhenTypeIsNotRegistered(){
         var sut = new ServiceProviderBuilder()
                 .buildServiceProvider();
 
@@ -23,7 +23,7 @@ public class ServiceProviderTests {
     }
 
     @Test
-    public void getServiceCallsFirstConstructorBasedOnAmountOfParameters() throws Exception{
+    void getServiceCallsFirstConstructorBasedOnAmountOfParameters() throws Exception{
         var sut = new ServiceProviderBuilder()
                 .addSingleton(ITestInterface.class, TestClass.class)
                 .addSingleton(ISecondTestInterface.class, SecondTestClass.class)
@@ -36,7 +36,7 @@ public class ServiceProviderTests {
     }
 
     @Test
-    public void whenUnableToCreateInstanceTheFailedServiceIsNamedInTheException(){
+    void whenUnableToCreateInstanceTheFailedServiceIsNamedInTheException(){
         var sut2 = new ServiceProviderBuilder()
                 .addSingleton(ISecondTestInterface.class, SecondTestClass.class)
                 .buildServiceProvider();

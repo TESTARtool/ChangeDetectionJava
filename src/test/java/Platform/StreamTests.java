@@ -1,17 +1,20 @@
 package Platform;
 
+import com.sun.source.tree.Tree;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StreamTests {
+class StreamTests {
 
     private final ArrayList<String> callList = new ArrayList<>();
 
     @Test
-    public void findFirstDoesNotExecuteOtherItemsInTheCall(){
+    void findFirstDoesNotExecuteOtherItemsInTheCall(){
         // I expect that findFirst would not execute the whole stream
         // but that it will execute items until the requested item is found.
         var list = new ArrayList<String>();
@@ -30,6 +33,25 @@ public class StreamTests {
 
         // now the test
         assertEquals(1, callList.size());
+    }
+
+    @Test
+    void testSameHash(){
+        var list1 = new TreeSet<String>();
+        list1.add("One");
+        list1.add("Two");
+        list1.add("Three");
+        list1.add("Four");
+
+        var list2 = new TreeSet<String>();
+        list2.add("One");
+        list2.add("Two");
+        list2.add("Three");
+        list2.add("Four");
+
+        var isSame = list1.containsAll(list2) && list2.containsAll(list1);
+
+        Assertions.assertTrue(isSame);
     }
 
     private int executeSomethingDifficult(String value){

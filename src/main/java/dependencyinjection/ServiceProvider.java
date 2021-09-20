@@ -1,5 +1,6 @@
 package dependencyinjection;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class ServiceProvider {
         var implementation = serviceDescriptor.getImplementationType();
         var constructors = implementation.getConstructors();
         var parametersLists = Arrays.stream(constructors)
-                .map(x -> x.getParameterTypes())
+                .map(Constructor::getParameterTypes)
                 .sorted((x1, x2) -> x1.length - x2.length)
                 .collect(Collectors.toList());
 
