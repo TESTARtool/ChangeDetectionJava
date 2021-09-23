@@ -1,9 +1,8 @@
 package modeldifference.orient;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
-import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
-import modeldifference.models.IIdentifier;
+import modeldifference.models.Identifier;
 
 import java.util.HashMap;
 
@@ -21,7 +20,7 @@ public class OrientDbCommand {
         return this;
     }
 
-    public OrientDbCommand addParameter(String name, IIdentifier identifier) {
+    public OrientDbCommand addParameter(String name, Identifier identifier) {
         this.parameters.put(name, identifier.getValue());
         return this;
     }

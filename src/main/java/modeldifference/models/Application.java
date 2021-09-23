@@ -1,21 +1,18 @@
 package modeldifference.models;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class Application {
     private String name;
     private int version;
     private ModelIdentifier abstractIdentifier;
-    private List<ApplicationState> states;
+    private Set<AbstractStateId> states;
     private SortedSet<String> attributes;
 
     public Application(String name, int version){
         this.name = name;
         this.version = version;
-        this.states = new ArrayList<>();
+        this.states = new HashSet<>();
         this.attributes = new TreeSet<>();
     }
 
@@ -35,13 +32,13 @@ public class Application {
         return this.abstractIdentifier;
     }
 
-    public void addState(ApplicationState state){
+    public void addAbstractStateId(AbstractStateId state){
         states.add(state);
     }
 
     public void addAttribute(String attribute) { attributes.add(attribute);}
 
-    public List<ApplicationState> getStates() {
+    public Set<AbstractStateId> getAbstractStateIds() {
         return states;
     }
 

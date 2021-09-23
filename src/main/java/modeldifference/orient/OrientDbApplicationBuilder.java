@@ -33,7 +33,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
                     .setModelIdentifier(identifier.get());
 
             abstractState(orientDb, identifier.get())
-                    .forEach(application::addState);
+                    .forEach(application::addAbstractStateId);
 
             abstractStateModelAbstractionAttributes(orientDb, identifier.get())
                     .forEach(application::addAttribute);
@@ -115,7 +115,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
             return resultSet.stream()
                     .filter(x -> x.isVertex() && x.getVertex().isPresent())
                     .filter(x -> x.getVertex().isPresent())
-                    .map(x -> x.getVertex().get().getProperty(ModelIdentifier.PROPERTY_NAME))
+                    .map(x -> x.getVertex().get().getProperty("modelIdentifier"))
                     .map(x -> new ModelIdentifier((String) x))
                     .findFirst();
         }
@@ -148,12 +148,12 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
             return resultSet.stream()
                     .filter(x -> x.isEdge() && x.getEdge().isPresent())
                     .map(x -> x.getEdge().get())
-                    .map(x -> new StateId(x.getVertex(ODirection.IN).getProperty(StateId.PROPERTY_NAME)))
+                    .map(x -> new StateId(x.getVertex(ODirection.IN).getProperty("stateId")))
                     .findFirst();
         }
     }
 
-    private Set<ApplicationState> abstractState(ODatabaseSession sessionDB, ModelIdentifier modelIdentifier){
+    private Set<AbstractStateId> abstractState(ODatabaseSession sessionDB, ModelIdentifier modelIdentifier){
         var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier";
 
         var command = new OrientDbCommand(sql)
@@ -162,8 +162,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
         try(var resultSet = command.executeReader(sessionDB)){
             return  resultSet.stream()
                     .filter(x -> x.isVertex() && x.getVertex().isPresent())
-                    .map(x -> new StateId(x.getVertex().get().getProperty(StateId.PROPERTY_NAME)))
-                    .map(ApplicationState::new)
+                    .map(x -> new AbstractStateId(x.getVertex().get().getProperty("stateId")))
                     .collect(Collectors.toSet())
                     ;
         }
