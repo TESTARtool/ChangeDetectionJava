@@ -7,7 +7,7 @@ import java.util.Set;
 public class AbstractState {
     private final AbstractStateId id;
     private ModelIdentifier modelIdentifier;
-    private Set concreteStateIds;
+    private Set<String> concreteStateIds;
     private boolean isInitial;
     private int counter;
 
@@ -22,4 +22,21 @@ public class AbstractState {
     public Set<String> getStateIds(){
         return concreteStateIds;
     }
+
+    public AbstractStateId getId(){
+        return this.id;
+    }
+
+    public ModelIdentifier getModelIdentifier(){
+        return this.modelIdentifier;
+    }
+
+    public boolean getIsInitial(){
+        return this.isInitial;
+    }
+
+    public int getCounter(){
+        return this.counter;
+    }
+
 }
