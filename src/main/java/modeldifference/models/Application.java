@@ -36,7 +36,7 @@ public class Application {
         states.add(state);
     }
 
-    public void addAttribute(String attribute) { attributes.add(attribute);}
+    public void addAbstractAttribute(String attribute) { attributes.add(attribute);}
 
     public Set<AbstractStateId> getAbstractStateIds() {
         return states;

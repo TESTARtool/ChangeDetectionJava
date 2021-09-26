@@ -12,38 +12,43 @@ import java.util.stream.Collectors;
 public class OrientDbApplicationBuilder implements IApplicationBuilder {
 
     private final IOrientDbFactory orientDbFactory;
-    private final IOrientDbSetting settings;
+    private final IAbstractStateModelEntityQuery abstractStateModelQuery;
+    private final IAbstractStateEntityQuery abstractStateEntityQuery;
 
-    public OrientDbApplicationBuilder(IOrientDbFactory orientDbFactory, IOrientDbSetting settings){
-
+    public OrientDbApplicationBuilder(IOrientDbFactory orientDbFactory, IAbstractStateModelEntityQuery abstractStateModelQuery, IAbstractStateEntityQuery abstractStateEntityQuery){
         this.orientDbFactory = orientDbFactory;
-        this.settings = settings;
+        this.abstractStateModelQuery = abstractStateModelQuery;
+        this.abstractStateEntityQuery = abstractStateEntityQuery;
     }
 
     public Optional<Application> getApplication(String applicationName, int version) {
 
-        try(var orientDb = orientDbFactory.openDatabase(settings)){
-            var identifier = abstractStateModelIdentifier(applicationName, version, orientDb);
+        var orientDb = orientDbFactory.openDatabase();
 
-            if (identifier.isEmpty()){
-                return Optional.empty();
-            }
+        var entity = abstractStateModelQuery.query(applicationName, version, orientDb);
 
-            var application = new Application(applicationName, version)
-                    .setModelIdentifier(identifier.get());
-
-            abstractState(orientDb, identifier.get())
-                    .forEach(application::addAbstractStateId);
-
-            abstractStateModelAbstractionAttributes(orientDb, identifier.get())
-                    .forEach(application::addAttribute);
-
-            return Optional.of(application);
+        if (entity.isEmpty()){
+            return Optional.empty();
         }
+
+        var application = new Application(applicationName, version)
+                .setModelIdentifier(entity.get().getModelIdentifier());
+
+        entity.get().getAbstractionAttributes()
+                .forEach(application::addAbstractAttribute);
+
+        abstractStateEntityQuery.query(application.getAbstractIdentifier(), orientDb)
+                .stream()
+                .map(x -> x.getStateIds())
+                .flatMap(x -> x.stream())
+                .map(x -> new AbstractStateId(x))
+                .forEach(application::addAbstractStateId);
+
+        return Optional.of(application);
     }
 
 
-    public Map<AbstractActionId, String> outgoingActionIdDesc(ODatabaseSession sessionDB, ModelIdentifier modelIdentifier, AbstractActionId abstractStateId) {
+    public Map<AbstractActionId, String> outgoingActionIdDesc(IODatabaseSession sessionDB, ModelIdentifier modelIdentifier, AbstractActionId abstractStateId) {
 
         var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier and stateId = :abstractStateId";
 
@@ -61,7 +66,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
         }
     }
 
-   public String concreteActionDescription(AbstractActionId abstractActionId, ODatabaseSession sessionDB) {
+   public String concreteActionDescription(AbstractActionId abstractActionId, IODatabaseSession sessionDB) {
 
        var sql = "SELECT FROM AbstractAction WHERE actionId = :actionId";
 
@@ -85,7 +90,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
        }
    }
 
-   private Optional<String> descriptionFromConcreteAction(String concreteActionId, ODatabaseSession sessionDB){
+   private Optional<String> descriptionFromConcreteAction(String concreteActionId, IODatabaseSession sessionDB){
 
        var sql =  "SELECT FROM ConcreteAction WHERE actionId = :actionId";
 
@@ -101,44 +106,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
        }
    }
 
-    private Optional<ModelIdentifier> abstractStateModelIdentifier(String applicationName, int version, ODatabaseSession sessionDB) {
-
-        var sql = "SELECT FROM AbstractStateModel where applicationName = :applicationName and "
-                + "applicationVersion = :applicationVersion";
-
-        var command = new OrientDbCommand(sql)
-            .addParameter("applicationName", applicationName)
-            .addParameter("applicationVersion", version);
-
-        try(var resultSet = command.executeReader(sessionDB)) {
-
-            return resultSet.stream()
-                    .filter(x -> x.isVertex() && x.getVertex().isPresent())
-                    .filter(x -> x.getVertex().isPresent())
-                    .map(x -> x.getVertex().get().getProperty("modelIdentifier"))
-                    .map(x -> new ModelIdentifier((String) x))
-                    .findFirst();
-        }
-    }
-
-    private Set<String> abstractStateModelAbstractionAttributes(ODatabaseSession sessionDB, ModelIdentifier modelIdentifier) {
-        var sql = "SELECT FROM AbstractStateModel where modelIdentifier = :modelIdentifier";
-
-        var command = new OrientDbCommand(sql)
-            .addParameter("modelIdentifier", modelIdentifier);
-
-        try(var resultSet = command.executeReader(sessionDB)){
-            var result = resultSet.stream()
-                    .filter(x -> x.isVertex() && x.getVertex().isPresent())
-                    .map(x -> x.getVertex().get())
-                    .map(x -> (Set<String>)x.getProperty("abstractionAttributes"))
-                    .findFirst();
-
-            return result.orElseGet(HashSet::new);
-        }
-    }
-
-    private Optional<StateId> abstractStateFromAction(ODatabaseSession sessionDB, AbstractActionId abstractActionId){
+    private Optional<StateId> abstractStateFromAction(IODatabaseSession sessionDB, AbstractActionId abstractActionId){
         var sql = "SELECT FROM AbstractAction where actionId = :abstractActionId";
 
         var command = new OrientDbCommand(sql)
@@ -150,21 +118,6 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
                     .map(x -> x.getEdge().get())
                     .map(x -> new StateId(x.getVertex(ODirection.IN).getProperty("stateId")))
                     .findFirst();
-        }
-    }
-
-    private Set<AbstractStateId> abstractState(ODatabaseSession sessionDB, ModelIdentifier modelIdentifier){
-        var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier";
-
-        var command = new OrientDbCommand(sql)
-                .addParameter("modelIdentifier", modelIdentifier);
-
-        try(var resultSet = command.executeReader(sessionDB)){
-            return  resultSet.stream()
-                    .filter(x -> x.isVertex() && x.getVertex().isPresent())
-                    .map(x -> new AbstractStateId(x.getVertex().get().getProperty("stateId")))
-                    .collect(Collectors.toSet())
-                    ;
         }
     }
 }

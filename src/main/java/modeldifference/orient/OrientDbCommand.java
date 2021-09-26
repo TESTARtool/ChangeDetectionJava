@@ -25,7 +25,7 @@ public class OrientDbCommand {
         return this;
     }
 
-    public OResultSet executeReader(ODatabaseSession sessionDB) {
+    public OResultSet executeReader(IODatabaseSession sessionDB) {
         return sessionDB.query(this.query, this.parameters);
     }
 }
