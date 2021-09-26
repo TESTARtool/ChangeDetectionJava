@@ -1,12 +1,15 @@
 import com.google.gson.*;
 import dependencyinjection.ServiceProviderBuilder;
 import modeldifference.IApplicationBuilder;
+import modeldifference.IOutputDifferences;
 import modeldifference.calculator.*;
+import modeldifference.htmloutput.HtmlOutputter;
 import modeldifference.models.AbstractActionId;
 import modeldifference.models.Identifier;
 import modeldifference.orient.*;
 import modeldifference.orient.query.AbstractStateEntityQuery;
 import modeldifference.orient.query.AbstractStateModelEntityQuery;
+import modeldifference.orient.query.ConcreteActionEntityQuery;
 
 import java.lang.reflect.Type;
 import java.util.logging.Level;
@@ -38,7 +41,10 @@ public class Main {
                 .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)
                 .addSingleton(IAbstractStateModelEntityQuery.class, AbstractStateModelEntityQuery.class)
                 .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
-                .buildServiceProvider();
+                .addSingleton(IOutputDifferences.class, HtmlOutputter.class)
+                .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
+                .buildServiceProvider()
+                ;
 
 
         var applicationBuilder = serviceProvider.getService(IApplicationBuilder.class);
@@ -46,20 +52,24 @@ public class Main {
         var applicationVersion2 = applicationBuilder.getApplication("exp", 2);
 
         if (applicationVersion1.isEmpty()){
-            var message =String.format("Unable to find application '%s' with version '%s'", "exp", 1);
+            var message = String.format("Unable to find application '%s' with version '%s'", "exp", 1);
             Logger.getLogger("Main").log(Level.SEVERE, message);
             return;
         }
 
         if (applicationVersion2.isEmpty()){
-            var message =String.format("Unable to find application '%s' with version '%s'", "exp", 2);
+            var message = String.format("Unable to find application '%s' with version '%s'", "exp", 2);
             Logger.getLogger("Main").log(Level.SEVERE, message);
             return;
         }
 
-   //     var differenceCalculator = serviceProvider.getService(IDifferenceCalculator.class);
+        var differenceCalculator = serviceProvider.getService(IDifferenceCalculator.class);
 
-  //      var differences = differenceCalculator.findApplicationDifferences(applicationVersion1.get(), applicationVersion2.get());
+        var differences = differenceCalculator.findApplicationDifferences(applicationVersion1.get(), applicationVersion2.get());
+
+        var difOutputter = serviceProvider.getService(IOutputDifferences.class);
+
+        difOutputter.output(differences);
 
         var gson = new GsonBuilder()
                 .setPrettyPrinting()

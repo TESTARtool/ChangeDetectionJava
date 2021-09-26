@@ -27,8 +27,6 @@ public class DifferenceCalculator implements IDifferenceCalculator {
             throw new AbstractAttributesNotTheSameException();
         }
 
-        application1.getAbstractStateIds().forEach(x -> {});
-
         var removeState = application1.getAbstractStateIds().stream()
                 .filter(x -> !application2.getAbstractStateIds().contains(x))
                 .collect(Collectors.toSet());
@@ -36,6 +34,10 @@ public class DifferenceCalculator implements IDifferenceCalculator {
         var addedState = application2.getAbstractStateIds().stream()
                 .filter(x -> !application1.getAbstractStateIds().contains(x))
                 .collect(Collectors.toSet());
+
+//        var addedAction = addedState.stream()
+  //              .map(
+
 
         return new ApplicationDifferences(removeState,  addedState);
 

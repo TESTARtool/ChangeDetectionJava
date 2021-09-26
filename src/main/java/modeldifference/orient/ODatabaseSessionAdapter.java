@@ -18,4 +18,8 @@ public class ODatabaseSessionAdapter implements IODatabaseSession {
     public OResultSet query(String query, Map args) throws OCommandSQLParsingException, OCommandExecutionException {
         return databaseSession.query(query, args);
     }
+
+    public void close() {
+        databaseSession.close();
+    }
 }

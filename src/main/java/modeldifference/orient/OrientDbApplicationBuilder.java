@@ -23,31 +23,39 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
 
     public Optional<Application> getApplication(String applicationName, int version) {
 
-        var orientDb = orientDbFactory.openDatabase();
+        try (var orientDb = orientDbFactory.openDatabase()){
 
-        var entity = abstractStateModelQuery.query(applicationName, version, orientDb);
+            var entity = abstractStateModelQuery.query(applicationName, version, orientDb);
 
-        if (entity.isEmpty()){
-            return Optional.empty();
-        }
+            if (entity.isEmpty()){
+                return Optional.empty();
+            }
 
-        var application = new Application(applicationName, version)
-                .setModelIdentifier(entity.get().getModelIdentifier());
+            var application = new Application(applicationName, version)
+                    .setModelIdentifier(entity.get().getModelIdentifier());
 
-        entity.get().getAbstractionAttributes()
-                .forEach(application::addAbstractAttribute);
+            entity.get().getAbstractionAttributes()
+                    .forEach(application::addAbstractAttribute);
 
-        abstractStateEntityQuery.query(application.getAbstractIdentifier(), orientDb)
-                .stream()
+            var states = abstractStateEntityQuery.query(application.getAbstractIdentifier(), orientDb);
+            states.stream()
                 .map(x -> x.getStateIds())
                 .flatMap(x -> x.stream())
                 .map(x -> new AbstractStateId(x))
                 .forEach(application::addAbstractStateId);
 
-        return Optional.of(application);
+
+
+            return Optional.of(application);
+        }
+        catch(Exception ex){
+            System.out.println("error");
+        }
+
+        return Optional.empty();
     }
 
-
+/*
     public Map<AbstractActionId, String> outgoingActionIdDesc(IODatabaseSession sessionDB, ModelIdentifier modelIdentifier, AbstractActionId abstractStateId) {
 
         var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier and stateId = :abstractStateId";
@@ -57,14 +65,26 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
                 .addParameter("abstractStateId", abstractStateId);
 
         try(var result = command.executeReader(sessionDB)){
-            return result.stream()
-                    .filter(x -> x.isVertex() && x.getVertex().isPresent())
-                    .map(x -> x.getVertex().get())
+            var xxx = result.vertexStream()
                     .map(x -> x.getEdges(ODirection.OUT))
+                    .map(x ->(OEdge)x)
+                    .collect(Collectors.toList());
+
+            var props = xxx.stream()
+                    .findFirst()
+                    .map(x -> x.getPropertyNames())
+                    ;
+
+            props.get()
+                    .forEach(x -> System.out.println(x));
+
+            return xxx.stream()
                     .map(x -> new AbstractActionId(((OEdge)x).getProperty("actionId")))
                     .collect(Collectors.toMap(x -> x, x-> concreteActionDescription(x, sessionDB)));
         }
     }
+
+ */
 
    public String concreteActionDescription(AbstractActionId abstractActionId, IODatabaseSession sessionDB) {
 
@@ -79,6 +99,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
                    .map(x -> x.getEdge().get())
                    .map(x -> (Set<String>)x.getProperty("concreteActionIds"))
                    .flatMap(Set::stream)
+                   .map(x -> new ConcreteActionId(x))
                    .collect(Collectors.toSet());
 
            return concreteActionIds.stream()
@@ -90,7 +111,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
        }
    }
 
-   private Optional<String> descriptionFromConcreteAction(String concreteActionId, IODatabaseSession sessionDB){
+   private Optional<String> descriptionFromConcreteAction(ConcreteActionId concreteActionId, IODatabaseSession sessionDB){
 
        var sql =  "SELECT FROM ConcreteAction WHERE actionId = :actionId";
 
@@ -98,10 +119,8 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
                .addParameter("actionId", concreteActionId);
 
        try(var resultSet = command.executeReader(sessionDB)) {
-           return resultSet.stream()
-                   .filter(x -> x.isEdge() && x.getEdge().isPresent())
-                   .map(x -> x.getEdge().get())
-                   .map(x -> (String) x.getProperty("Desc"))
+           return resultSet.edgeStream()
+                   .map(x -> (String)x.getProperty("Desc"))
                    .findFirst();
        }
    }
@@ -113,9 +132,7 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
                 .addParameter("abstractActionId", abstractActionId);
 
         try (var resultSet = command.executeReader(sessionDB)){
-            return resultSet.stream()
-                    .filter(x -> x.isEdge() && x.getEdge().isPresent())
-                    .map(x -> x.getEdge().get())
+            return resultSet.edgeStream()
                     .map(x -> new StateId(x.getVertex(ODirection.IN).getProperty("stateId")))
                     .findFirst();
         }

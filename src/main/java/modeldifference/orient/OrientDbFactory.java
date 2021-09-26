@@ -12,10 +12,9 @@ public class OrientDbFactory implements IOrientDbFactory {
 
     public IODatabaseSession openDatabase() {
         try(var orientDb = new OrientDB(settings.getUrl(), settings.getConfig())) {
-            try(var session = orientDb.open(settings.getDatabaseName(), settings.getUserName(), settings.getPassword()))
-            {
-                return new ODatabaseSessionAdapter(session);
-            }
+            var session = orientDb.open(settings.getDatabaseName(), settings.getUserName(), settings.getPassword());
+
+            return new ODatabaseSessionAdapter(session);
         }
     }
 }
