@@ -1,20 +1,27 @@
 package modeldifference.calculator;
 
-import modeldifference.models.AbstractStateId;
+import modeldifference.models.AbstractActionId;
 import modeldifference.models.Application;
-import org.fruit.alayer.IStateManagementTags;
-import org.fruit.alayer.IUIAMapping;
-import org.fruit.alayer.IWdMapping;
-import org.fruit.alayer.Tag;
+import modeldifference.orient.entity.AbstractActionEntity;
+import modeldifference.orient.entity.ConcreteActionEntity;
+import modeldifference.orient.query.IAbstractActionEntityQuery;
+import modeldifference.orient.query.IAbstractStateEntityQuery;
+import modeldifference.orient.query.IConcreteActionEntityQuery;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DifferenceCalculator implements IDifferenceCalculator {
 
-    public DifferenceCalculator(IStateManagementTags tags){//}, IUIAMapping uiMapping, IWdMapping wdMappings){
+    private final IAbstractActionEntityQuery abstractActionEntityQuery;
+    private final IAbstractStateEntityQuery stateEntityQuery;
+    private final IConcreteActionEntityQuery concreteActionEntityQuery;
+
+    public DifferenceCalculator(IAbstractActionEntityQuery abstractActionEntityQuery, IAbstractStateEntityQuery stateEntityQuery, IConcreteActionEntityQuery concreteActionEntityQuery){
+        this.abstractActionEntityQuery = abstractActionEntityQuery;//}, IUIAMapping uiMapping, IWdMapping wdMappings){
+        this.stateEntityQuery = stateEntityQuery;
+        this.concreteActionEntityQuery = concreteActionEntityQuery;
     }
 
     public ApplicationDifferences findApplicationDifferences(Application application1, Application application2) throws DifferenceCalculatorException {
@@ -27,41 +34,75 @@ public class DifferenceCalculator implements IDifferenceCalculator {
             throw new AbstractAttributesNotTheSameException();
         }
 
-        var removeState = application1.getAbstractStateIds().stream()
+        var removeStates = application1.getAbstractStateIds().stream()
                 .filter(x -> !application2.getAbstractStateIds().contains(x))
-                .collect(Collectors.toSet());
+                .map(x -> stateEntityQuery.query(application1.getAbstractIdentifier(), x , null))
+                .map(Optional::get)
+                .collect(Collectors.toList());
 
-        var addedState = application2.getAbstractStateIds().stream()
+        var addedStates = application2.getAbstractStateIds().stream()
                 .filter(x -> !application1.getAbstractStateIds().contains(x))
-                .collect(Collectors.toSet());
+                .map(x -> stateEntityQuery.query(application2.getAbstractIdentifier(), x , null))
+                .map(Optional::get)
+                .collect(Collectors.toList());
 
-//        var addedAction = addedState.stream()
-  //              .map(
+
+        var descriptionForAbstractAction = new HashMap<AbstractActionId, ConcreteActionEntity>();
+
+        for (var disappearedState : removeStates) {
+            var abstractActions = disappearedState.getOutgoingActionIds().stream()
+                    .map(x -> abstractActionEntityQuery.query(x, null))
+                    .flatMap(x -> x.stream())
+                    .collect(Collectors.toList());
+
+            for (var action : abstractActions) {
+                var concreteActionEntity = action.getConcreteActionIds().stream()
+                        .map(x -> concreteActionEntityQuery.query(x, null))
+                        .flatMap(x -> x.stream())
+                        .findFirst();
+
+                if (concreteActionEntity.isPresent()) {
+                    descriptionForAbstractAction.put(action.getId(), concreteActionEntity.get());
+                }
+            }
+        }
+
+        for (var addedState : addedStates){
+            var abstractActions = addedState.getOutgoingActionIds().stream()
+                    .map(x -> abstractActionEntityQuery.query(x, null))
+                    .flatMap(x -> x.stream())
+                    .collect(Collectors.toList());
+
+            for (var action : abstractActions) {
+                var concreteActionEntity = action.getConcreteActionIds().stream()
+                        .map(x -> concreteActionEntityQuery.query(x, null))
+                        .flatMap(x -> x.stream())
+                        .findFirst();
+
+                if (concreteActionEntity.isPresent()) {
+                    descriptionForAbstractAction.put(action.getId(), concreteActionEntity.get());
+                }
+            }
+        }
 
 
-        return new ApplicationDifferences(removeState,  addedState);
+
+        return new ApplicationDifferences(removeStates,  addedStates);
 
 /*
         application1.getAbstractStateIds().forEach( abstractStateId -> {
             // Only if doesn't exists in the State Model Two
             if(!allAbstractStatesModelTwo.contains(abstractStateId)) {
-
                 String screenshotPath = modelDifferenceDatabase.screenshotConcreteState(modelDifferenceDatabase.concreteStateId(abstractStateId), "disappearedState");
                 disappearedStatesImages.put(abstractStateId, screenshotPath);
-
-                disappearedActions.put(abstractStateId, modelDifferenceDatabase.outgoingActionIdDesc(identifierModelOne, abstractStateId));
             }
-
         });
 
         allAbstractStatesModelTwo.forEach( abstractStateId -> {
             // Only if doesn't exists in the State Model One
             if(!allAbstractStatesModelOne.contains(abstractStateId)) {
-
                 String screenshotPath = modelDifferenceDatabase.screenshotConcreteState(modelDifferenceDatabase.concreteStateId(abstractStateId), "NewState");
                 newStatesImages.put(abstractStateId, screenshotPath);
-
-                newActions.put(abstractStateId, modelDifferenceDatabase.outgoingActionIdDesc(identifierModelTwo, abstractStateId));
             }
         */
     }

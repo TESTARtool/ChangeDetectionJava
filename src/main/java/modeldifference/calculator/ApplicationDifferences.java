@@ -1,25 +1,27 @@
 package modeldifference.calculator;
 
 import modeldifference.models.AbstractStateId;
+import modeldifference.orient.entity.AbstractState;
 
+import java.util.List;
 import java.util.Set;
 
 public class ApplicationDifferences {
 
-    private final Set<AbstractStateId> removedState;
-    private final Set<AbstractStateId> addedState;
+    private final List<AbstractState> removedState;
+    private final List<AbstractState> addedState;
 
-    public ApplicationDifferences(Set<AbstractStateId> removedState, Set<AbstractStateId> addedState) {
+    public ApplicationDifferences(List<AbstractState> removedState, List<AbstractState> addedState) {
 
         this.removedState = removedState;
         this.addedState = addedState;
     }
 
-    public Set<AbstractStateId> getRemovedStates() {
+    public List<AbstractState> getRemovedStates() {
         return removedState;
     }
 
-    public Set<AbstractStateId> getAddedStates() {
+    public List<AbstractState> getAddedStates() {
         return addedState;
     }
 }

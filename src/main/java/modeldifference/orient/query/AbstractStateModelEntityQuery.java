@@ -1,7 +1,6 @@
 package modeldifference.orient.query;
 
 import com.orientechnologies.orient.core.record.OVertex;
-import modeldifference.orient.IAbstractStateModelEntityQuery;
 import modeldifference.orient.IODatabaseSession;
 import modeldifference.orient.OrientDbCommand;
 import modeldifference.orient.entity.AbstractStateModel;

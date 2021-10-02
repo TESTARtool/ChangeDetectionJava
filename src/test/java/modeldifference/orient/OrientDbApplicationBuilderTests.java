@@ -6,6 +6,8 @@ import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import modeldifference.models.ModelIdentifier;
 import modeldifference.orient.entity.AbstractState;
 import modeldifference.orient.entity.AbstractStateModel;
+import modeldifference.orient.query.IAbstractStateEntityQuery;
+import modeldifference.orient.query.IAbstractStateModelEntityQuery;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

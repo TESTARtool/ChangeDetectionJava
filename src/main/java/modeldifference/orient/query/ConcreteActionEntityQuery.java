@@ -2,16 +2,15 @@ package modeldifference.orient.query;
 
 import com.orientechnologies.orient.core.record.OEdge;
 import modeldifference.models.ConcreteActionId;
-import modeldifference.orient.IConcreteActionEntityQuery;
 import modeldifference.orient.IODatabaseSession;
 import modeldifference.orient.OrientDbCommand;
-import modeldifference.orient.entity.ConcreteAction;
+import modeldifference.orient.entity.ConcreteActionEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConcreteActionEntityQuery  implements IConcreteActionEntityQuery {
-    public List<ConcreteAction> query(ConcreteActionId concreteActionId, IODatabaseSession sessionDB) {
+    public List<ConcreteActionEntity> query(ConcreteActionId concreteActionId, IODatabaseSession sessionDB) {
         var sql =  "SELECT FROM ConcreteAction WHERE actionId = :actionId";
 
         var command = new OrientDbCommand(sql)
@@ -24,8 +23,8 @@ public class ConcreteActionEntityQuery  implements IConcreteActionEntityQuery {
         }
     }
 
-    private ConcreteAction map(OEdge result){
-        return new ConcreteAction(
+    private ConcreteActionEntity map(OEdge result){
+        return new ConcreteActionEntity(
                 new ConcreteActionId(result.getProperty("actionId")),
                 result.getProperty("Desc")
         );

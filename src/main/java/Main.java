@@ -7,9 +7,7 @@ import modeldifference.htmloutput.HtmlOutputter;
 import modeldifference.models.AbstractActionId;
 import modeldifference.models.Identifier;
 import modeldifference.orient.*;
-import modeldifference.orient.query.AbstractStateEntityQuery;
-import modeldifference.orient.query.AbstractStateModelEntityQuery;
-import modeldifference.orient.query.ConcreteActionEntityQuery;
+import modeldifference.orient.query.*;
 
 import java.lang.reflect.Type;
 import java.util.logging.Level;
@@ -43,6 +41,7 @@ public class Main {
                 .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
                 .addSingleton(IOutputDifferences.class, HtmlOutputter.class)
                 .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
+                .addSingleton(IAbstractActionEntityQuery.class, AbstractActionEntityQuery.class)
                 .buildServiceProvider()
                 ;
 

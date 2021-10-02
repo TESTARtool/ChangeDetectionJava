@@ -1,5 +1,6 @@
-package modeldifference.orient;
+package modeldifference.orient.query;
 
+import modeldifference.orient.IODatabaseSession;
 import modeldifference.orient.entity.AbstractStateModel;
 
 import java.util.Optional;

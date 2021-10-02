@@ -3,9 +3,9 @@ package modeldifference.orient.query;
 import com.orientechnologies.orient.core.record.ODirection;
 import com.orientechnologies.orient.core.record.OEdge;
 import com.orientechnologies.orient.core.record.OVertex;
+import modeldifference.models.AbstractActionId;
 import modeldifference.models.AbstractStateId;
 import modeldifference.models.ModelIdentifier;
-import modeldifference.orient.IAbstractStateEntityQuery;
 import modeldifference.orient.IODatabaseSession;
 import modeldifference.orient.OrientDbCommand;
 import modeldifference.orient.entity.AbstractState;
@@ -22,25 +22,23 @@ public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
                 .addParameter("modelIdentifier", modelIdentifier);
 
         try(var resultSet = command.executeReader(sessionDB)){
-
-            var xxx = resultSet.vertexStream()
-                    .findFirst()
-                    .get();
-
-            var edges = xxx.getEdges(ODirection.OUT);
-
-            for (OEdge ed: edges) {
-                var edge = (OEdge)ed;
-                var props = edge.getPropertyNames();
-                for (var prop : props){
-                    System.out.println(prop);
-                }
-            }
-
-
             return resultSet.vertexStream()
                     .map(this::mapToAbstractState)
                     .collect(Collectors.toList());
+        }
+    }
+
+    public Optional<AbstractState> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId, IODatabaseSession sessionDB){
+        var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier AND stateId = :abstractStateId";
+
+        var command = new OrientDbCommand(sql)
+                .addParameter("modelIdentifier", modelIdentifier)
+                .addParameter("abstractActionId", abstractStateId);
+
+        try(var resultSet = command.executeReader(sessionDB)){
+            return resultSet.vertexStream()
+                    .map(this::mapToAbstractState)
+                    .findFirst();
         }
     }
 
@@ -48,10 +46,31 @@ public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
         return new AbstractState(
                 new AbstractStateId(result.getProperty("stateId")),
                 new ModelIdentifier(result.getProperty("modelIdentifier")),
-                (Set)result.getProperty("concreteStateIds"),
+                (Set<String>)result.getProperty("concreteStateIds"),
                 (boolean)result.getProperty("isInitial"),
-                (int)result.getProperty("counter")
+                (int)result.getProperty("counter"),
+                outgoingAbstractActionIds(result),
+                incomingAbstractActionIds(result)
         );
     }
 
+    private List<AbstractActionId> outgoingAbstractActionIds(OVertex result){
+        var actionIds = new ArrayList<AbstractActionId>();
+        var edges = result.getEdges(ODirection.OUT);
+        for (OEdge edge: edges) {
+            actionIds.add(new AbstractActionId(edge.getProperty("actionId")));
+        }
+
+        return actionIds;
+    }
+
+    private List<AbstractActionId> incomingAbstractActionIds(OVertex result){
+        var actionIds = new ArrayList<AbstractActionId>();
+        var edges = result.getEdges(ODirection.IN);
+        for (OEdge edge: edges) {
+            actionIds.add(new AbstractActionId(edge.getProperty("actionId")));
+        }
+
+        return actionIds;
+    }
 }
