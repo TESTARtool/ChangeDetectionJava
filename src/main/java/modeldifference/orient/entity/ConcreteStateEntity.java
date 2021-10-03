@@ -12,4 +12,8 @@ public class ConcreteStateEntity {
         this.id = id;
         this.screenshotBytes = screenshotBytes;
     }
+
+    public ORecordBytes getScreenshotBytes(){
+        return this.screenshotBytes;
+    }
 }

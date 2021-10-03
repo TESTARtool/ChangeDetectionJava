@@ -8,14 +8,14 @@ import modeldifference.models.AbstractStateId;
 import modeldifference.models.ModelIdentifier;
 import modeldifference.orient.IODatabaseSession;
 import modeldifference.orient.OrientDbCommand;
-import modeldifference.orient.entity.AbstractState;
+import modeldifference.orient.entity.AbstractStateEntity;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
 
-    public List<AbstractState> query(ModelIdentifier modelIdentifier, IODatabaseSession sessionDB){
+    public List<AbstractStateEntity> query(ModelIdentifier modelIdentifier, IODatabaseSession sessionDB){
         var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier";
 
         var command = new OrientDbCommand(sql)
@@ -28,7 +28,7 @@ public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
         }
     }
 
-    public Optional<AbstractState> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId, IODatabaseSession sessionDB){
+    public Optional<AbstractStateEntity> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId, IODatabaseSession sessionDB){
         var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier AND stateId = :abstractStateId";
 
         var command = new OrientDbCommand(sql)
@@ -42,8 +42,8 @@ public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
         }
     }
 
-    private AbstractState mapToAbstractState(OVertex result){
-        return new AbstractState(
+    private AbstractStateEntity mapToAbstractState(OVertex result){
+        return new AbstractStateEntity(
                 new AbstractStateId(result.getProperty("stateId")),
                 new ModelIdentifier(result.getProperty("modelIdentifier")),
                 (Set<String>)result.getProperty("concreteStateIds"),

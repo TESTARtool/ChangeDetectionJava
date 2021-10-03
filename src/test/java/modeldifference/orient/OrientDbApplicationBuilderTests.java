@@ -4,7 +4,7 @@ import com.orientechnologies.orient.core.exception.OCommandExecutionException;
 import com.orientechnologies.orient.core.sql.OCommandSQLParsingException;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import modeldifference.models.ModelIdentifier;
-import modeldifference.orient.entity.AbstractState;
+import modeldifference.orient.entity.AbstractStateEntity;
 import modeldifference.orient.entity.AbstractStateModel;
 import modeldifference.orient.query.IAbstractStateEntityQuery;
 import modeldifference.orient.query.IAbstractStateModelEntityQuery;
@@ -51,7 +51,7 @@ public class OrientDbApplicationBuilderTests {
         attributes.add("att2");
 
         when(abstractStateModelQueryMock.query("TILT", 1, testAdapter)).thenReturn(Optional.of(new AbstractStateModel(1, "abc", attributes, "TILT")));
-        when(abstractStateEntityQueryMock.query(new ModelIdentifier("abc"), testAdapter)).thenReturn(new ArrayList<AbstractState>());
+        when(abstractStateEntityQueryMock.query(new ModelIdentifier("abc"), testAdapter)).thenReturn(new ArrayList<AbstractStateEntity>());
 
         var applicationOptional = sut.getApplication("TILT", 1);
 

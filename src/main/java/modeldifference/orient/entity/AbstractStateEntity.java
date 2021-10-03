@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class AbstractState {
+public class AbstractStateEntity {
     private final AbstractStateId id;
     private final ModelIdentifier modelIdentifier;
     private final Set<ConcreteStateId> concreteStateIds;
@@ -18,7 +18,7 @@ public class AbstractState {
     private final List<AbstractActionId> outgoingActionIds;
     private final List<AbstractActionId> incomingActionIds;
 
-    public AbstractState(AbstractStateId id, ModelIdentifier modelIdentifier, Set<String> concreteStateIds, boolean isInitial, int counter, List<AbstractActionId> outgoingActionIds, List<AbstractActionId> incomingActionIds){
+    public AbstractStateEntity(AbstractStateId id, ModelIdentifier modelIdentifier, Set<String> concreteStateIds, boolean isInitial, int counter, List<AbstractActionId> outgoingActionIds, List<AbstractActionId> incomingActionIds){
         this.id = id;
         this.modelIdentifier = modelIdentifier;
         this.isInitial = isInitial;
@@ -30,7 +30,7 @@ public class AbstractState {
                 .collect(Collectors.toSet());
     }
 
-    public Set<ConcreteStateId> getStateIds(){
+    public Set<ConcreteStateId> getConcreteStateIdsStateIds(){
         return concreteStateIds;
     }
 

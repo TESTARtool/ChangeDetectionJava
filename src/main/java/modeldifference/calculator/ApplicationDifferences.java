@@ -1,10 +1,8 @@
 package modeldifference.calculator;
 
-import modeldifference.models.AbstractStateId;
-import modeldifference.orient.entity.AbstractState;
+import modeldifference.models.AbstractState;
 
 import java.util.List;
-import java.util.Set;
 
 public class ApplicationDifferences {
 
