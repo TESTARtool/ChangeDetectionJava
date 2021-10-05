@@ -85,7 +85,6 @@ public class DifferenceCalculator implements IDifferenceCalculator {
             removedStates.add(new AbstractState(disappearedState.getId(), concreteStateEntity.getScreenshotBytes().toStream(), actions));
         }
 
-
         var addedStates = new ArrayList<AbstractState>();
 
         for (var addedState : addedStateEntities){
@@ -114,24 +113,7 @@ public class DifferenceCalculator implements IDifferenceCalculator {
             addedStates.add(new AbstractState(addedState.getId(), concreteStateEntity.getScreenshotBytes().toStream(), actions));
         }
 
-        return new ApplicationDifferences(removedStates,  addedStates);
-
-/*
-        application1.getAbstractStateIds().forEach( abstractStateId -> {
-            // Only if doesn't exists in the State Model Two
-            if(!allAbstractStatesModelTwo.contains(abstractStateId)) {
-                String screenshotPath = modelDifferenceDatabase.screenshotConcreteState(modelDifferenceDatabase.concreteStateId(abstractStateId), "disappearedState");
-                disappearedStatesImages.put(abstractStateId, screenshotPath);
-            }
-        });
-
-        allAbstractStatesModelTwo.forEach( abstractStateId -> {
-            // Only if doesn't exists in the State Model One
-            if(!allAbstractStatesModelOne.contains(abstractStateId)) {
-                String screenshotPath = modelDifferenceDatabase.screenshotConcreteState(modelDifferenceDatabase.concreteStateId(abstractStateId), "NewState");
-                newStatesImages.put(abstractStateId, screenshotPath);
-            }
-        */
+        return new ApplicationDifferences(application1, application2, removedStates,  addedStates);
     }
 
     public class AbstractAttributesNotTheSameException extends DifferenceCalculatorException{
