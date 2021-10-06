@@ -12,4 +12,16 @@ public class AbstractState {
         this.screenshot = screenshot;
         this.actions = actions;
     }
+
+    public byte[] getScreenshot() {
+        return screenshot;
+    }
+
+    public AbstractStateId getId() {
+        return id;
+    }
+
+    public List<AbstractAction> getActions(){
+        return actions;
+    }
 }

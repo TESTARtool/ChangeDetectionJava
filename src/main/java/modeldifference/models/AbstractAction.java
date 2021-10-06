@@ -9,4 +9,8 @@ public class AbstractAction {
         this.id = id;
         this.description = description;
     }
+
+    public String getDescription(){
+        return description;
+    }
 }

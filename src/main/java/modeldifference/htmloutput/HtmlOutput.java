@@ -2,12 +2,13 @@ package modeldifference.htmloutput;
 
 import modeldifference.IOutputDifferences;
 import modeldifference.calculator.ApplicationDifferences;
+import modeldifference.models.AbstractAction;
+import modeldifference.models.AbstractState;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.List;
 
-public class HtmlOutputter implements IOutputDifferences {
+public class HtmlOutput implements IOutputDifferences {
 
     public final static String CHARSET = "UTF-8";
 
@@ -20,10 +21,36 @@ public class HtmlOutputter implements IOutputDifferences {
                 out.println(s);
                 out.flush();
             }
+
+            addStateAndActionsToHtml(differences.getRemovedStates());
+            addStateAndActionsToHtml(differences.getAddedStates());
+
+            // Image or Widget Tree comparison
+            startSpecificStateChanges();
+
+            closeHTMLreport();
+
+
         } catch (IOException e) {
             System.out.println("ERROR: Unable to start the State Model Difference Report : " + htmlFilename);
             e.printStackTrace();
         }
+    }
+
+    private void addStateAndActionsToHtml(List<AbstractState> states){
+        startDisappearedAbstractStates(states.size());
+
+        for (var state: states){
+            addDisappearedAbstractState(state);
+
+            for (var action : state.getActions()) {
+                addActionDescription(action);
+            }
+
+            addEndDiv();
+
+        }
+        addEndDiv();
     }
 
 
@@ -43,9 +70,6 @@ public class HtmlOutputter implements IOutputDifferences {
     private String htmlFilename = "DifferenceReport.html";
     private PrintWriter out;
 
-    public String getHtmlFileName() {
-        return htmlFilename;
-    }
 
     public void startDisappearedAbstractStates(int numberDisappearedAbstractStates) {
         out.println("<h2> Disappeared Abstract States: " + numberDisappearedAbstractStates + "</h2>");
@@ -53,9 +77,24 @@ public class HtmlOutputter implements IOutputDifferences {
         out.flush();
     }
 
-    public void addDisappearedAbstractState(String disStateImage) {
+    public void addDisappearedAbstractState(AbstractState abstractState) {
+        // save the file to disk
+        File screenshotFile = new File(abstractState.getId().getValue() + ".png");
+        if (!screenshotFile.exists()) {
+            try {
+                FileOutputStream outputStream = new FileOutputStream(screenshotFile.getCanonicalPath());
+                outputStream.write(abstractState.getScreenshot());
+                outputStream.flush();
+                outputStream.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         out.println("<div class=<\"float\">");
-        out.println("<p><img src=\"" + disStateImage + "\"></p>");
+        out.println("<p><img src=\"" + screenshotFile.getPath() + "\"></p>");
         out.println("<h4> Disappeared Actions of this State, Concrete Description </h4>");
         out.flush();
     }
@@ -73,8 +112,8 @@ public class HtmlOutputter implements IOutputDifferences {
         out.flush();
     }
 
-    public void addActionDesc(String actionDesc) {
-        out.println("<p style=\"color:red;\">" + actionDesc + "</p>");
+    public void addActionDescription(AbstractAction actionDesc) {
+        out.println("<p style=\"color:red;\">" + actionDesc.getDescription() + "</p>");
         out.flush();
     }
 

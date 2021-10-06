@@ -3,7 +3,7 @@ import dependencyinjection.ServiceProviderBuilder;
 import modeldifference.IApplicationBuilder;
 import modeldifference.IOutputDifferences;
 import modeldifference.calculator.*;
-import modeldifference.htmloutput.HtmlOutputter;
+import modeldifference.htmloutput.HtmlOutput;
 import modeldifference.models.AbstractActionId;
 import modeldifference.models.Identifier;
 import modeldifference.orient.*;
@@ -39,9 +39,10 @@ public class Main {
                 .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)
                 .addSingleton(IAbstractStateModelEntityQuery.class, AbstractStateModelEntityQuery.class)
                 .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
-                .addSingleton(IOutputDifferences.class, HtmlOutputter.class)
+                .addSingleton(IOutputDifferences.class, HtmlOutput.class)
                 .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
                 .addSingleton(IAbstractActionEntityQuery.class, AbstractActionEntityQuery.class)
+                .addSingleton(IConcreteStateEntityQuery.class, ConcreteStateEntityQuery.class)
                 .buildServiceProvider()
                 ;
 

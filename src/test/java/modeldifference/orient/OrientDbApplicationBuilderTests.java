@@ -10,6 +10,7 @@ import modeldifference.orient.query.IAbstractStateEntityQuery;
 import modeldifference.orient.query.IAbstractStateModelEntityQuery;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,6 +68,11 @@ public class OrientDbApplicationBuilderTests {
 
         public OResultSet query(String query, Map args) throws OCommandSQLParsingException, OCommandExecutionException {
             return null;
+        }
+
+        @Override
+        public void close() throws IOException {
+
         }
     }
 }

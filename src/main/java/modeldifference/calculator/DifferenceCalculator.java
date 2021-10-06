@@ -2,7 +2,7 @@ package modeldifference.calculator;
 
 import com.orientechnologies.orient.core.record.impl.ORecordBytes;
 import modeldifference.models.*;
-import modeldifference.orient.entity.AbstractActionEntity;
+import modeldifference.orient.IOrientDbFactory;
 import modeldifference.orient.entity.ConcreteActionEntity;
 import modeldifference.orient.entity.ConcreteStateEntity;
 import modeldifference.orient.query.IAbstractActionEntityQuery;
@@ -10,22 +10,23 @@ import modeldifference.orient.query.IAbstractStateEntityQuery;
 import modeldifference.orient.query.IConcreteActionEntityQuery;
 import modeldifference.orient.query.IConcreteStateEntityQuery;
 
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DifferenceCalculator implements IDifferenceCalculator {
 
+    private final IOrientDbFactory orientDbFactory;
     private final IAbstractActionEntityQuery abstractActionEntityQuery;
     private final IAbstractStateEntityQuery stateEntityQuery;
     private final IConcreteActionEntityQuery concreteActionEntityQuery;
     private final IConcreteStateEntityQuery concreteStateEntityQuery;
 
-    public DifferenceCalculator(IAbstractActionEntityQuery abstractActionEntityQuery, IAbstractStateEntityQuery stateEntityQuery,
+    public DifferenceCalculator(IOrientDbFactory orientDbFactory, IAbstractActionEntityQuery abstractActionEntityQuery, IAbstractStateEntityQuery stateEntityQuery,
                                 IConcreteActionEntityQuery concreteActionEntityQuery,
                                 IConcreteStateEntityQuery concreteStateEntityQuery){
+        this.orientDbFactory = orientDbFactory;
         this.abstractActionEntityQuery = abstractActionEntityQuery;//}, IUIAMapping uiMapping, IWdMapping wdMappings){
         this.stateEntityQuery = stateEntityQuery;
         this.concreteActionEntityQuery = concreteActionEntityQuery;
@@ -42,84 +43,89 @@ public class DifferenceCalculator implements IDifferenceCalculator {
             throw new AbstractAttributesNotTheSameException();
         }
 
-        var removeStateEntities = application1.getAbstractStateIds().stream()
-                .filter(x -> !application2.getAbstractStateIds().contains(x))
-                .map(x -> stateEntityQuery.query(application1.getAbstractIdentifier(), x , null))
-                .map(Optional::get)
-                .collect(Collectors.toList());
+        try (var orientDb = orientDbFactory.openDatabase()) {
 
-        var addedStateEntities = application2.getAbstractStateIds().stream()
-                .filter(x -> !application1.getAbstractStateIds().contains(x))
-                .map(x -> stateEntityQuery.query(application2.getAbstractIdentifier(), x , null))
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-
-        var removedStates = new ArrayList<AbstractState>();
-
-        for (var disappearedState : removeStateEntities) {
-            var concreteStateEntity = disappearedState.getConcreteStateIdsStateIds().stream()
-                    .map(x -> concreteStateEntityQuery.query(x, null))
-                    .filter(x -> x.isPresent())
-                    .map((x -> x.get()))
-                    .findFirst()
-                    .orElse(new ConcreteStateEntity(new ConcreteStateId(""), new ORecordBytes()));
-
-            var abstractActions = disappearedState.getOutgoingActionIds().stream()
-                    .map(x -> abstractActionEntityQuery.query(x, null))
-                    .flatMap(x -> x.stream())
+            var removeStateEntities = application1.getAbstractStateIds().stream()
+                    .filter(x -> !application2.getAbstractStateIds().contains(x))
+                    .map(x -> stateEntityQuery.query(application1.getAbstractIdentifier(), x, orientDb))
+                    .map(Optional::get)
                     .collect(Collectors.toList());
 
-            var actions = new ArrayList<AbstractAction>();
-
-            for (var action : abstractActions) {
-                var concreteActionEntity = action.getConcreteActionIds().stream()
-                        .map(x -> concreteActionEntityQuery.query(x, null))
-                        .flatMap(x -> x.stream())
-                        .findFirst()
-                        .orElse(new ConcreteActionEntity(new ConcreteActionId(""), "TILT"));
-
-                actions.add(new AbstractAction(action.getId(), concreteActionEntity.getDescription()));
-            }
-
-            removedStates.add(new AbstractState(disappearedState.getId(), concreteStateEntity.getScreenshotBytes().toStream(), actions));
-        }
-
-        var addedStates = new ArrayList<AbstractState>();
-
-        for (var addedState : addedStateEntities){
-            var concreteStateEntity = addedState.getConcreteStateIdsStateIds().stream()
-                    .map(x -> concreteStateEntityQuery.query(x, null))
-                    .filter(x -> x.isPresent())
-                    .map((x -> x.get()))
-                    .findFirst()
-                    .orElse(new ConcreteStateEntity(new ConcreteStateId(""), new ORecordBytes()));
-
-            var abstractActions = addedState.getOutgoingActionIds().stream()
-                    .map(x -> abstractActionEntityQuery.query(x, null))
-                    .flatMap(x -> x.stream())
+            var addedStateEntities = application2.getAbstractStateIds().stream()
+                    .filter(x -> !application1.getAbstractStateIds().contains(x))
+                    .map(x -> stateEntityQuery.query(application2.getAbstractIdentifier(), x, orientDb))
+                    .map(Optional::get)
                     .collect(Collectors.toList());
 
-            var actions = new ArrayList<AbstractAction>();
-            for (var action : abstractActions) {
-                var concreteActionEntity = action.getConcreteActionIds().stream()
-                        .map(x -> concreteActionEntityQuery.query(x, null))
-                        .flatMap(x -> x.stream())
+
+            var removedStates = new ArrayList<AbstractState>();
+
+            for (var disappearedState : removeStateEntities) {
+                var concreteStateEntity = disappearedState.getConcreteStateIdsStateIds().stream()
+                        .map(x -> concreteStateEntityQuery.query(x, orientDb))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
                         .findFirst()
-                        .orElse(new ConcreteActionEntity(new ConcreteActionId(""), "TILT"));
-                actions.add(new AbstractAction(action.getId(), concreteActionEntity.getDescription()));
+                        .orElse(new ConcreteStateEntity(new ConcreteStateId(""), new ORecordBytes()));
+
+                var abstractActions = disappearedState.getOutgoingActionIds().stream()
+                        .map(x -> abstractActionEntityQuery.query(x, orientDb))
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.toList());
+
+                var actions = new ArrayList<AbstractAction>();
+
+                for (var action : abstractActions) {
+                    var concreteActionEntity = action.getConcreteActionIds().stream()
+                            .map(x -> concreteActionEntityQuery.query(x, orientDb))
+                            .flatMap(Collection::stream)
+                            .findFirst()
+                            .orElse(new ConcreteActionEntity(new ConcreteActionId(""), "TILT"));
+
+                    actions.add(new AbstractAction(action.getId(), concreteActionEntity.getDescription()));
+                }
+
+                removedStates.add(new AbstractState(disappearedState.getId(), concreteStateEntity.getScreenshotBytes().toStream(), actions));
             }
 
-            addedStates.add(new AbstractState(addedState.getId(), concreteStateEntity.getScreenshotBytes().toStream(), actions));
+            var addedStates = new ArrayList<AbstractState>();
+
+            for (var addedState : addedStateEntities) {
+                var concreteStateEntity = addedState.getConcreteStateIdsStateIds().stream()
+                        .map(x -> concreteStateEntityQuery.query(x, orientDb))
+                        .filter(Optional::isPresent)
+                        .map((Optional::get))
+                        .findFirst()
+                        .orElse(new ConcreteStateEntity(new ConcreteStateId(""), new ORecordBytes()));
+
+                var abstractActions = addedState.getOutgoingActionIds().stream()
+                        .map(x -> abstractActionEntityQuery.query(x, orientDb))
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.toList());
+
+                var actions = new ArrayList<AbstractAction>();
+                for (var action : abstractActions) {
+                    var concreteActionEntity = action.getConcreteActionIds().stream()
+                            .map(x -> concreteActionEntityQuery.query(x, orientDb))
+                            .flatMap(Collection::stream)
+                            .findFirst()
+                            .orElse(new ConcreteActionEntity(new ConcreteActionId(""), "TILT"));
+                    actions.add(new AbstractAction(action.getId(), concreteActionEntity.getDescription()));
+                }
+
+                addedStates.add(new AbstractState(addedState.getId(), concreteStateEntity.getScreenshotBytes().toStream(), actions));
+            }
+
+            return new ApplicationDifferences(application1, application2, removedStates, addedStates);
+        }
+        catch(Exception ex){
+            System.out.println("error");
+            ex.printStackTrace();
+            throw new DifferenceCalculatorException(ex);
         }
 
-        return new ApplicationDifferences(application1, application2, removedStates,  addedStates);
-    }
-
-    public class AbstractAttributesNotTheSameException extends DifferenceCalculatorException{
 
     }
-
 
 /*
     private Set<Tag<?>> checkStateModelAbstractAttributes(Application application ) {
