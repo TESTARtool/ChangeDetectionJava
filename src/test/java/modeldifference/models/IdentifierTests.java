@@ -30,7 +30,7 @@ class IdentifierTests {
         var didAdd = set.add(id2);
 
         Assertions.assertTrue(didAdd);
-        Assertions.assertEquals(0, set.size());
+        Assertions.assertEquals(2, set.size());
     }
 
     private class OtherTestId extends Identifier{
