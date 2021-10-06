@@ -45,7 +45,7 @@ class ServiceProviderTests {
             sut2.getService(ISecondTestInterface.class);
         });
 
-        var expected = "Unable to resolve service for type 'DependencyInjector.ITestInterface' while attempting to activate 'DependencyInjector.ISecondTestInterface'.";
+        var expected = "Unable to resolve service for type 'dependencyinjector.ITestInterface' while attempting to activate 'dependencyinjector.ISecondTestInterface'.";
         var actual = exception.getMessage();
 
         assertEquals(expected, actual);
