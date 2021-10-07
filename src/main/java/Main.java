@@ -71,11 +71,11 @@ public class Main {
 
         difOutputter.output(differences);
 
-        var gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
-        var json = gson.toJson(applicationVersion1);
-        System.out.println(json);
-                   System.out.println("--------");
+      //  var gson = new GsonBuilder()
+      //          .setPrettyPrinting()
+      //          .create();
+      //  var json = gson.toJson(applicationVersion1);
+      //  System.out.println(json);
+      //             System.out.println("--------");
     }
 }

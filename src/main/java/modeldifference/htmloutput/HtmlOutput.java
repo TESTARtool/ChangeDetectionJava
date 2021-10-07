@@ -6,15 +6,56 @@ import modeldifference.models.AbstractAction;
 import modeldifference.models.AbstractState;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 
 public class HtmlOutput implements IOutputDifferences {
 
     public final static String CHARSET = "UTF-8";
 
+    //public HtmlOutput(boolean overwriteExisting, String outputDirectory){
+
+    //}
+
+    private final boolean overwriteExistingRun = true;
+    private final String outputDirectory  = "out";
+
+    private void deleteDirectoryAndItContents(Path path){
+        try(var files = Files.walk(path)){
+
+            files.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::deleteOnExit);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void output(ApplicationDifferences differences) {
-        this.htmlFilename = "DifferenceReport.html";
+        // exp_v1_diff_exp_v2
+
+        var diffName =
+                differences.getFirstVersion().getName() + "_" + differences.getFirstVersion().getVersion()
+                + "_diff_" +
+                differences.getSecondVersion().getName() + "_" + differences.getSecondVersion().getVersion();
+
+        var path = Paths.get(outputDirectory, diffName);
+
+        if (Files.exists(path) && overwriteExistingRun){
+            deleteDirectoryAndItContents(path);
+        }
+
         try {
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+
+            this.htmlFilename = outputDirectory + File.separator + diffName + File.separator + "DifferenceReport.html";
+
             this.out = new PrintWriter(new File(htmlFilename).getCanonicalPath(), CHARSET);
 
             for(String s : HEADER){
@@ -22,13 +63,13 @@ public class HtmlOutput implements IOutputDifferences {
                 out.flush();
             }
 
-            addStateAndActionsToHtml(differences.getRemovedStates());
-            addStateAndActionsToHtml(differences.getAddedStates());
+            addStateAndActionsToHtml(differences.getRemovedStates(), path);
+            addStateAndActionsToHtml(differences.getAddedStates(),path);
 
             // Image or Widget Tree comparison
             startSpecificStateChanges();
 
-            closeHTMLreport();
+            closeHtmlReport();
 
 
         } catch (IOException e) {
@@ -37,11 +78,11 @@ public class HtmlOutput implements IOutputDifferences {
         }
     }
 
-    private void addStateAndActionsToHtml(List<AbstractState> states){
+    private void addStateAndActionsToHtml(List<AbstractState> states, Path outputLocation){
         startDisappearedAbstractStates(states.size());
 
         for (var state: states){
-            addDisappearedAbstractState(state);
+            addDisappearedAbstractState(state, outputLocation);
 
             for (var action : state.getActions()) {
                 addActionDescription(action);
@@ -77,12 +118,17 @@ public class HtmlOutput implements IOutputDifferences {
         out.flush();
     }
 
-    public void addDisappearedAbstractState(AbstractState abstractState) {
+    public void addDisappearedAbstractState(AbstractState abstractState, Path outputLocation) {
         // save the file to disk
-        File screenshotFile = new File(abstractState.getId().getValue() + ".png");
+        var screenshotPath = Paths.get(outputLocation.toString(), abstractState.getId().getValue() + ".png");
+        var screenshotFile = new File(screenshotPath.toUri());
+        //var screenshotFile = new File(outputLocation + abstractState.getId().getValue() + ".png");
+
+      //  System.out.println(screenshotFile.getCanonicalPath().toString());
+
         if (!screenshotFile.exists()) {
             try {
-                FileOutputStream outputStream = new FileOutputStream(screenshotFile.getCanonicalPath());
+                var outputStream = new FileOutputStream(screenshotFile.getCanonicalFile());
                 outputStream.write(abstractState.getScreenshot());
                 outputStream.flush();
                 outputStream.close();
@@ -144,7 +190,7 @@ public class HtmlOutput implements IOutputDifferences {
         out.flush();
     }
 
-    public void closeHTMLreport() {
+    public void closeHtmlReport() {
         out.flush();
         out.close();
     }
