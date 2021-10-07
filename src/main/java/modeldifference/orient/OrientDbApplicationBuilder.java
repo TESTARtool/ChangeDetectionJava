@@ -40,11 +40,6 @@ public class OrientDbApplicationBuilder implements IApplicationBuilder {
             var states = abstractStateEntityQuery.query(application.getAbstractIdentifier(), orientDb);
             states.stream()
                     .forEach(x -> application.addAbstractStateId(x.getId()));
-            //states.stream()
-             //   .map(x -> x.getStateIds())
-               // .flatMap(x -> x.stream())
-                //.map(x -> new AbstractStateId(x))
-                //.forEach(application::addAbstractStateId);
 
             return Optional.of(application);
         }

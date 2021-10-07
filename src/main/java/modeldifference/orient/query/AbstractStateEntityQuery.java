@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
 
     public List<AbstractStateEntity> query(ModelIdentifier modelIdentifier, IODatabaseSession sessionDB){
-        var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier";
+        var sql = "SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier";
 
         var command = new OrientDbCommand(sql)
                 .addParameter("modelIdentifier", modelIdentifier);
@@ -29,11 +29,11 @@ public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
     }
 
     public Optional<AbstractStateEntity> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId, IODatabaseSession sessionDB){
-        var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier AND stateId = :abstractStateId";
+        var sql = "SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier AND stateId = :abstractStateId";
 
         var command = new OrientDbCommand(sql)
                 .addParameter("modelIdentifier", modelIdentifier)
-                .addParameter("abstractActionId", abstractStateId);
+                .addParameter("abstractStateId", abstractStateId);
 
         try(var resultSet = command.executeReader(sessionDB)){
             return resultSet.vertexStream()
