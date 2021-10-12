@@ -1,5 +1,9 @@
 package dependencyinjection;
 
+import settings.ISettingProvider;
+import settings.ISettingsFor;
+import settings.ISettingsForInternal;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
