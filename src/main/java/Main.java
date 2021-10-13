@@ -7,6 +7,10 @@ import modeldifference.models.AbstractActionId;
 import modeldifference.models.Identifier;
 import modeldifference.orient.*;
 import modeldifference.orient.query.*;
+import org.fruit.alayer.IStateManagementTags;
+import org.fruit.alayer.IUIAMapping;
+import org.fruit.alayer.StateManagementTags;
+import org.fruit.alayer.windows.UIAMapping;
 import settings.*;
 
 import java.lang.reflect.Type;
@@ -49,6 +53,8 @@ public class Main {
         } else {
 
             var serviceProvider = new ServiceProviderBuilder()
+                    .addSingleton(IUIAMapping.class, UIAMapping.class)
+                    .addSingleton(IStateManagementTags.class, StateManagementTags.class )
                     .addSingleton(IApplication.class, Application.class)
                     .addSingleton(ISettingProvider.class, settingsProvider)
                     .addSingleton(IOrientDbSetting.class, OrientDbSetting.class)

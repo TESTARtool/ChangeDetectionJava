@@ -18,6 +18,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'org.mockito:mockito-all:1.10.19'
     implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.guava:guava:26.0-jre'
 }
 
 test {
