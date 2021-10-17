@@ -3,13 +3,17 @@ import dependencyinjection.ServiceProviderBuilder;
 import modeldifference.*;
 import modeldifference.calculator.*;
 import modeldifference.htmloutput.HtmlOutput;
+import modeldifference.htmloutput.IStateModelDifferenceJsonWidget;
+import modeldifference.htmloutput.StateModelDifferenceJsonWidget;
 import modeldifference.models.AbstractActionId;
 import modeldifference.models.Identifier;
 import modeldifference.orient.*;
 import modeldifference.orient.query.*;
 import org.fruit.alayer.IStateManagementTags;
 import org.fruit.alayer.IUIAMapping;
+import org.fruit.alayer.IWdMapping;
 import org.fruit.alayer.StateManagementTags;
+import org.fruit.alayer.webdriver.enums.WdMapping;
 import org.fruit.alayer.windows.UIAMapping;
 import settings.*;
 
@@ -38,7 +42,7 @@ public class Main {
         System.out.println("this is not very helpful help");
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         Logger.getGlobal().setLevel(Level.SEVERE);
 
@@ -53,6 +57,9 @@ public class Main {
         } else {
 
             var serviceProvider = new ServiceProviderBuilder()
+                    .addSingleton(IWidgetTreeQuery.class, WidgetTreeQuery.class)
+                    .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
+                    .addSingleton(IWdMapping.class, WdMapping.class)
                     .addSingleton(IUIAMapping.class, UIAMapping.class)
                     .addSingleton(IStateManagementTags.class, StateManagementTags.class )
                     .addSingleton(IApplication.class, Application.class)

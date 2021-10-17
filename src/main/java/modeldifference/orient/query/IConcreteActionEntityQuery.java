@@ -7,5 +7,5 @@ import modeldifference.orient.entity.ConcreteActionEntity;
 import java.util.List;
 
 public interface IConcreteActionEntityQuery {
-    List<ConcreteActionEntity> query(ConcreteActionId concreteActionId, IODatabaseSession sessionDB);
+    List<ConcreteActionEntity> query(ConcreteActionId concreteActionId);
 }

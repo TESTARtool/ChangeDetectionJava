@@ -32,13 +32,13 @@ public class OrientDbApplicationBuilderTests {
         testAdapter = new TestAdapter();
         when(orientDbFactoryMock.openDatabase()).thenReturn(testAdapter);
 
-        sut = new OrientDbApplicationBuilder(orientDbFactoryMock, abstractStateModelQueryMock, abstractStateEntityQueryMock);
+        sut = new OrientDbApplicationBuilder(abstractStateModelQueryMock, abstractStateEntityQueryMock);
     }
 
     @Test
     void whenApplicationCannotBeFoundEmptyOptionalObjectIsReturned(){
 
-        when(abstractStateModelQueryMock.query("Not Found", 404, testAdapter)).thenReturn(Optional.empty());
+        when(abstractStateModelQueryMock.query("Not Found", 404)).thenReturn(Optional.empty());
 
         var application = sut.getApplication("Not Found", 404);
 
@@ -51,8 +51,8 @@ public class OrientDbApplicationBuilderTests {
         attributes.add("att1");
         attributes.add("att2");
 
-        when(abstractStateModelQueryMock.query("TILT", 1, testAdapter)).thenReturn(Optional.of(new AbstractStateModel(1, "abc", attributes, "TILT")));
-        when(abstractStateEntityQueryMock.query(new ModelIdentifier("abc"), testAdapter)).thenReturn(new ArrayList<AbstractStateEntity>());
+        when(abstractStateModelQueryMock.query("TILT", 1)).thenReturn(Optional.of(new AbstractStateModel(1, "abc", attributes, "TILT")));
+        when(abstractStateEntityQueryMock.query(new ModelIdentifier("abc"))).thenReturn(new ArrayList<AbstractStateEntity>());
 
         var applicationOptional = sut.getApplication("TILT", 1);
 
@@ -70,9 +70,5 @@ public class OrientDbApplicationBuilderTests {
             return null;
         }
 
-        @Override
-        public void close() throws IOException {
-
-        }
     }
 }

@@ -7,5 +7,5 @@ import modeldifference.orient.entity.ConcreteStateEntity;
 import java.util.Optional;
 
 public interface IConcreteStateEntityQuery  {
-    Optional<ConcreteStateEntity> query(ConcreteStateId stateId, IODatabaseSession sessionDb);
+    Optional<ConcreteStateEntity> query(ConcreteStateId stateId);
 }

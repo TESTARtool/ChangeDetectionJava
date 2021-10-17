@@ -1,24 +1,40 @@
 package modeldifference.htmloutput;
 
+import com.google.common.collect.Sets;
 import modeldifference.IOutputDifferences;
 import modeldifference.calculator.ApplicationDifferences;
+import modeldifference.calculator.StateModelDifferenceImages;
 import modeldifference.models.AbstractAction;
 import modeldifference.models.AbstractState;
+import org.fruit.Pair;
+import org.fruit.alayer.IStateManagementTags;
+import org.fruit.alayer.IUIAMapping;
+import org.fruit.alayer.IWdMapping;
+import org.fruit.alayer.Tag;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class HtmlOutput implements IOutputDifferences {
 
     public final static String CHARSET = "UTF-8";
+    private final IUIAMapping uiaMapping;
+    private final IWdMapping wdMapping;
+    private final IStateManagementTags stateManagementTags;
+    private final IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget;
 
-    //public HtmlOutput(boolean overwriteExisting, String outputDirectory){
-
-    //}
+    public HtmlOutput(IUIAMapping uiaMapping, IWdMapping wdMapping, IStateManagementTags stateManagementTags, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget){
+        this.uiaMapping = uiaMapping;
+        this.wdMapping = wdMapping;
+        this.stateManagementTags = stateManagementTags;
+        this.stateModelDifferenceJsonWidget = stateModelDifferenceJsonWidget;
+    }
 
     private final boolean overwriteExistingRun = true;
     private final String outputDirectory  = "out";
@@ -35,13 +51,14 @@ public class HtmlOutput implements IOutputDifferences {
         }
     }
 
-    public void output(ApplicationDifferences differences) {
-        // exp_v1_diff_exp_v2
+    private String generateDifferenceName(ApplicationDifferences differences){
+        return differences.getFirstVersion().getName() + "_" + differences.getFirstVersion().getVersion()
+               + "_diff_" +
+               differences.getSecondVersion().getName() + "_" + differences.getSecondVersion().getVersion();
+    }
 
-        var diffName =
-                differences.getFirstVersion().getName() + "_" + differences.getFirstVersion().getVersion()
-                + "_diff_" +
-                differences.getSecondVersion().getName() + "_" + differences.getSecondVersion().getVersion();
+    public void output(ApplicationDifferences differences) {
+        var diffName = generateDifferenceName(differences);
 
         var path = Paths.get(outputDirectory, diffName);
 
@@ -65,16 +82,73 @@ public class HtmlOutput implements IOutputDifferences {
 
             addStateAndActionsToHtml(differences.getRemovedStates(), path);
             addStateAndActionsToHtml(differences.getAddedStates(),path);
-
-            // Image or Widget Tree comparison
-            startSpecificStateChanges();
+            addImageOrWidgetTreeComparison(differences, path);
 
             closeHtmlReport();
-
 
         } catch (IOException e) {
             System.out.println("ERROR: Unable to start the State Model Difference Report : " + htmlFilename);
             e.printStackTrace();
+        }
+    }
+
+
+    private  Set<Tag<?>> abstractAttributesTags(ApplicationDifferences differences){
+        return null;
+    }
+
+    private void addImageOrWidgetTreeComparison(ApplicationDifferences differences, Path path){
+        // Image or Widget Tree comparison
+        startSpecificStateChanges();
+
+        var abstractAttributesTags = abstractAttributesTags(differences);
+        var newAbstractStates = differences.getAddedStates();
+
+        for(var newStateModelTwo :  newAbstractStates) {
+
+            var incomingActionsModelTwo = newStateModelTwo.getIncomingActions();
+
+            // Set<Pair<String, String>> incomingActionsModelTwo = modelDifferenceDatabase.incomingActionsIdDesc(identifierModelTwo, newStateModelTwo);
+            //       incomingActionsModelTwo.remove(new Pair<String, String>(null,""));
+
+
+            var disappearedAbstractStates = differences.getRemovedStates();
+            for(var dissStateModelOne :  disappearedAbstractStates) {
+
+                var incomingActionsModelOne = dissStateModelOne.getIncomingActions();
+
+                // Set<Pair<String, String>> incomingActionsModelOne = modelDifferenceDatabase.incomingActionsIdDesc(identifierModelOne, dissStateModelOne);
+                // incomingActionsModelOne.remove(new Pair<String, String>(null,""));
+
+                var intersection = Sets.intersection(incomingActionsModelTwo, incomingActionsModelOne);
+
+                if (!intersection.isEmpty()){
+                    // Create the Image Difference
+                    var diffDisk = StateModelDifferenceImages.getDifferenceImage(
+                            dissStateModelOne.getScreenshot(), dissStateModelOne.getId(),
+                            newStateModelTwo.getScreenshot(), newStateModelTwo.getId(),
+                            path);
+
+                    if (diffDisk.isPresent()) {
+
+                        var locationScreenshotOne = Paths.get(path.toString(), dissStateModelOne.getId().getValue() + ".png");
+                        var locationScreenshotTwo = Paths.get(path.toString(), newStateModelTwo.getId().getValue() + ".png");
+
+                        addSpecificStateChange(locationScreenshotOne, locationScreenshotTwo, diffDisk.get());
+                    }
+
+                    addSpecificActionReached(intersection.toString());
+
+                    // Widget Tree Abstract Properties Difference
+                    var widgetTreeDifference = stateModelDifferenceJsonWidget.jsonWidgetTreeDifference(abstractAttributesTags, path, dissStateModelOne, newStateModelTwo);
+
+                    for(var widgetInformation : widgetTreeDifference) {
+                        addSpecificWidgetInfo(widgetInformation);
+                    }
+                }
+
+            }
+
         }
     }
 
@@ -84,7 +158,7 @@ public class HtmlOutput implements IOutputDifferences {
         for (var state: states){
             addDisappearedAbstractState(state, outputLocation);
 
-            for (var action : state.getActions()) {
+            for (var action : state.getOutgoingActions()) {
                 addActionDescription(action);
             }
 
@@ -99,11 +173,11 @@ public class HtmlOutput implements IOutputDifferences {
             "<!DOCTYPE html>",
             "<html>",
             "<style>",
-            ".container {display: flex;}",
-            ".float {display:inline-block;}",
+            "   .container {display: flex;}",
+            "   .float {display:inline-block;}",
             "</style>",
             "<head>",
-            "<title>TESTAR State Model difference report</title>",
+            "   <title>TESTAR State Model difference report</title>",
             "</head>",
             "<body>"
     };
@@ -168,10 +242,10 @@ public class HtmlOutput implements IOutputDifferences {
         out.flush();
     }
 
-    public void addSpecificStateChange(String oldStateImage, String newStateImage, String diffStateImage) {
-        out.println("<p><img src=\"" + oldStateImage + "\">");
-        out.println("<img src=\"" + newStateImage + "\">");
-        out.println("<img src=\"" + diffStateImage + "\"></p>");
+    public void addSpecificStateChange(Path oldStateImage, Path newStateImage, Path diffStateImage) {
+        out.println("<p><img src=\"" + oldStateImage.toString() + "\">");
+        out.println("<img src=\"" + newStateImage.toString() + "\">");
+        out.println("<img src=\"" + diffStateImage.toString() + "\"></p>");
         out.flush();
     }
 

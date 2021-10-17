@@ -784,7 +784,7 @@ public final class Windows{
     public static native int GetDpiForWindow(long hwnd);
 
     /* ApplicationActivationManager */
-    public static native long IApplicationActivationManager_ActivateApplication(long pAppActMngr, String appUserModelId, String arguments, int options) throws UIAException; // by wcoux
+   // public static native long IApplicationActivationManager_ActivateApplication(long pAppActMngr, String appUserModelId, String arguments, int options) throws UIAException; // by wcoux
 
 
     /* UIAutomation */

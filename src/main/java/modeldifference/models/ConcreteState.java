@@ -2,25 +2,26 @@ package modeldifference.models;
 
 import java.util.Objects;
 
-public class AbstractAction {
-    private final AbstractActionId id;
-    private final String description;
+public class ConcreteState {
+    private final ConcreteStateId id;
+    private final byte[] screenshot;
 
-    public AbstractAction(AbstractActionId id, String description){
-
+    public ConcreteState(ConcreteStateId id, byte[] screenshot){
         this.id = id;
-        this.description = description;
+        this.screenshot = screenshot;
     }
 
-    public String getDescription(){
-        return description;
+    public byte[] getScreenshot(){
+        return this.screenshot;
     }
+
+    public ConcreteStateId getId() {return this.id;}
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AbstractAction that = (AbstractAction) o;
+        ConcreteState that = (ConcreteState) o;
         return Objects.equals(id, that.id);
     }
 

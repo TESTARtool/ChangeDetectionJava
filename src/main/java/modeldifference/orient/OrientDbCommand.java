@@ -28,4 +28,8 @@ public class OrientDbCommand {
     public OResultSet executeReader(IODatabaseSession sessionDB) {
         return sessionDB.query(this.query, this.parameters);
     }
+
+    public OResultSet executeReader(IOrientDbFactory orientDbFactory){
+        return executeReader(orientDbFactory.openDatabase());
+    }
 }

@@ -5,6 +5,7 @@ import com.orientechnologies.orient.core.record.OEdge;
 import modeldifference.models.AbstractActionId;
 import modeldifference.models.AbstractStateId;
 import modeldifference.orient.IODatabaseSession;
+import modeldifference.orient.IOrientDbFactory;
 import modeldifference.orient.OrientDbCommand;
 import modeldifference.orient.entity.AbstractActionEntity;
 
@@ -12,12 +13,20 @@ import java.util.Optional;
 import java.util.Set;
 
 public class AbstractActionEntityQuery  implements IAbstractActionEntityQuery{
-    public Optional<AbstractActionEntity> query(AbstractActionId id, IODatabaseSession sessionDb){
+
+    private final IOrientDbFactory orientDbFactory;
+
+    public AbstractActionEntityQuery(IOrientDbFactory orientDbFactory){
+
+        this.orientDbFactory = orientDbFactory;
+    }
+
+    public Optional<AbstractActionEntity> query(AbstractActionId id){
         var sql = "SELECT FROM AbstractAction where actionId = :abstractActionId";
         var command = new OrientDbCommand(sql)
                 .addParameter("abstractActionId", id);
 
-        try(var resultSet = command.executeReader(sessionDb)){
+        try(var resultSet = command.executeReader(orientDbFactory)){
             return resultSet.edgeStream()
                     .map(this::map)
                     .findFirst();

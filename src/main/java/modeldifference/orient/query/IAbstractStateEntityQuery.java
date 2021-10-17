@@ -9,6 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IAbstractStateEntityQuery {
-    Optional<AbstractStateEntity> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId, IODatabaseSession sessionDB);
-    List<AbstractStateEntity> query(ModelIdentifier modelIdentifier, IODatabaseSession sessionDB);
+    Optional<AbstractStateEntity> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId);
+    List<AbstractStateEntity> query(ModelIdentifier modelIdentifier);
 }
