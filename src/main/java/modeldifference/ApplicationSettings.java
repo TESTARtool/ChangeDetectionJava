@@ -8,12 +8,12 @@ public class ApplicationSettings {
     public String applicationName1;
 
     @IsSetting(name = "applicationVersion1")
-    public int applicationVersion1;
+    public String applicationVersion1;
 
     @IsSetting(name = "applicationName2")
     public String applicationName2;
 
     @IsSetting(name = "applicationVersion2")
-    public int applicationVersion2;
+    public String applicationVersion2;
 
 }
