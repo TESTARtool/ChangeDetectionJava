@@ -1,6 +1,7 @@
 package modeldifference.htmloutput;
 
 import com.google.common.collect.Sets;
+import es.upv.staq.testar.StateManagementTags;
 import modeldifference.IOutputDifferences;
 import modeldifference.calculator.ApplicationDifferences;
 import modeldifference.calculator.StateModelDifferenceImages;
@@ -11,15 +12,16 @@ import org.fruit.alayer.IStateManagementTags;
 import org.fruit.alayer.IUIAMapping;
 import org.fruit.alayer.IWdMapping;
 import org.fruit.alayer.Tag;
+import org.fruit.alayer.webdriver.enums.WdMapping;
+import org.fruit.alayer.windows.UIAMapping;
 
 import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HtmlOutput implements IOutputDifferences {
 
@@ -93,8 +95,52 @@ public class HtmlOutput implements IOutputDifferences {
     }
 
 
-    private  Set<Tag<?>> abstractAttributesTags(ApplicationDifferences differences){
-        return null;
+    private Set<Tag<?>> abstractAttributesTags(ApplicationDifferences differences){
+
+        // Update Set object "abstractAttributesTags" with the Tags
+        // we need to check for Widget Tree difference
+        var stateModelTags =  differences.getFirstVersion().getAttributes();
+
+        var mangementTags = stateModelTags.stream()
+                .map(this::capitalizeWordsAndRemoveSpaces)
+                .map(x -> stateManagementTags.getTagFromSettingsString(x))
+                .collect(Collectors.toSet());
+
+        var tags = new HashSet<Tag<?>>();
+
+        mangementTags.stream()
+                .map(x -> uiaMapping.getMappedStateTag(x))
+                .filter(Optional::isPresent)
+                .map(x -> (Tag<?>) x.get())
+                .forEach(tags::add);
+
+        mangementTags.stream()
+                .map(x -> wdMapping.getMappedStateTag(x))
+                .filter(x -> x.isPresent())
+                .map(x -> (Tag<?>) x.get())
+                .forEach(tags::add);
+
+        return tags;
+    }
+
+    /**
+     * Helper class to transform State Model String attribute
+     * into a StateManagementTag Setting String
+     *
+     * From: widget control type
+     * To: WidgetControlType
+     *
+     * @return
+     */
+    private String capitalizeWordsAndRemoveSpaces(String attribute) {
+        String words[] = attribute.split("\\s");
+        StringBuilder capitalizeWord = new StringBuilder("");
+        for(String w : words){
+            String first = w.substring(0,1);
+            String afterfirst = w.substring(1);
+            capitalizeWord.append(first.toUpperCase() + afterfirst);
+        }
+        return capitalizeWord.toString().trim();
     }
 
     private void addImageOrWidgetTreeComparison(ApplicationDifferences differences, Path path){

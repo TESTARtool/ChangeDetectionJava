@@ -77,25 +77,12 @@ public class Main {
                     .buildServiceProvider();
 
             try {
-
-
                 var application = serviceProvider.getService(IApplication.class);
                 application.Run();
             }
             catch (Exception ex){
                 ex.printStackTrace();
             }
-           /*
-
-
-            */
-
-            //  var gson = new GsonBuilder()
-            //          .setPrettyPrinting()
-            //          .create();
-            //  var json = gson.toJson(applicationVersion1);
-            //  System.out.println(json);
-            //             System.out.println("--------");
         }
     }
 }
