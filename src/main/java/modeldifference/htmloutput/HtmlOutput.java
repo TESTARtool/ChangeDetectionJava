@@ -242,9 +242,6 @@ public class HtmlOutput implements IOutputDifferences {
         // save the file to disk
         var screenshotPath = Paths.get(outputLocation.toString(), abstractState.getId().getValue() + ".png");
         var screenshotFile = new File(screenshotPath.toUri());
-        //var screenshotFile = new File(outputLocation + abstractState.getId().getValue() + ".png");
-
-      //  System.out.println(screenshotFile.getCanonicalPath().toString());
 
         if (!screenshotFile.exists()) {
             try {
@@ -311,6 +308,8 @@ public class HtmlOutput implements IOutputDifferences {
     }
 
     public void closeHtmlReport() {
+        out.println("</body>");
+        out.println("</html>");
         out.flush();
         out.close();
     }

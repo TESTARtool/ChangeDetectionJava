@@ -7,13 +7,13 @@ import settings.ISettingsFor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Application implements IApplication {
+public class ModelDifferenceApplication implements IApplication {
     private final ISettingProvider settingProvider;
     private final IApplicationBuilder applicationBuilder;
     private final IDifferenceCalculator differenceCalculator;
     private final IOutputDifferences outputDifferences;
 
-    public Application(ISettingProvider settingProvider, IApplicationBuilder applicationBuilder, IDifferenceCalculator differenceCalculator, IOutputDifferences outputDifferences){
+    public ModelDifferenceApplication(ISettingProvider settingProvider, IApplicationBuilder applicationBuilder, IDifferenceCalculator differenceCalculator, IOutputDifferences outputDifferences){
         this.settingProvider = settingProvider;
         this.applicationBuilder = applicationBuilder;
         this.differenceCalculator = differenceCalculator;

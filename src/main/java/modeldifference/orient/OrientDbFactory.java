@@ -11,6 +11,7 @@ public class OrientDbFactory implements IOrientDbFactory {
 
     public OrientDbFactory(IOrientDbSetting settings){
         this.settings = settings;
+        this.databaseSessionCache = Optional.empty();
     }
 
     public IODatabaseSession openDatabase() {

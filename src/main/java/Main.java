@@ -62,7 +62,7 @@ public class Main {
                     .addSingleton(IWdMapping.class, WdMapping.class)
                     .addSingleton(IUIAMapping.class, UIAMapping.class)
                     .addSingleton(IStateManagementTags.class, StateManagementTags.class )
-                    .addSingleton(IApplication.class, Application.class)
+                    .addSingleton(IApplication.class, ModelDifferenceApplication.class)
                     .addSingleton(ISettingProvider.class, settingsProvider)
                     .addSingleton(IOrientDbSetting.class, OrientDbSetting.class)
                     .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
