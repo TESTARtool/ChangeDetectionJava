@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WidgetTreeQuery implements IWidgetTreeQuery{
 
@@ -34,7 +36,7 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
     }
 
     public String query(Path location, ConcreteStateId concreteStateId) {
-        var elements = getWidgets(concreteStateId);
+        var elements = getWidgets(location, concreteStateId);
 
         // then get the parent/child relationship between the widgets
         var sql = "SELECT FROM isChildOf WHERE in IN(SELECT ConcreteIDCustom FROM (TRAVERSE in('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteId)))";
@@ -47,11 +49,11 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
         }
 
         // create a filename
-        var filename = concreteStateId.getValue() + "_widget_tree_json";
+        var filename = concreteStateId.getValue() + "_widget_tree.json";
         return writeJson(location, elements, filename);
     }
 
-    private ArrayList<Element> getWidgets(ConcreteStateId concreteStateId){
+    private ArrayList<Element> getWidgets(Path location, ConcreteStateId concreteStateId){
         var elements = new ArrayList<Element>();
 
         // first get all the widgets using the State ConcreteIDCustom property
@@ -60,13 +62,11 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
                 .addParameter("concreteId", concreteStateId);
 
         try(var resultSet = command.executeReader(orientDbFactory.openDatabase())){
-            elements.addAll(fetchNodes(resultSet, "Widget", null, ""));
+            elements.addAll(fetchNodes(location, resultSet, "Widget", null, concreteStateId.getValue()));
         }
 
         return elements;
     }
-
-
 
     // this helper method will write elements to a file in json format
     private String writeJson(Path location, ArrayList<Element> elements, String filename) {
@@ -130,7 +130,6 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
         }
     }
 
-
     // this helper method formats the @RID property into something that can be used in a web frontend
     private String formatId(String id) {
         if (id.indexOf("#") != 0) return id; // not an orientdb id
@@ -138,23 +137,33 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
         return id.replaceAll("[:]", "_");
     }
 
-    /**
-     * This method saves screenshots to disk.
-     * @param recordBytes
-     * @param identifier
-     */
-        /*
+    private String processScreenShot(Path location, ORecordBytes recordBytes, String identifier, String folderName) {
 
-    private String processScreenShot(ORecordBytes recordBytes, String identifier, String folderName) {
-        if (!Main.outputDir.substring(Main.outputDir.length() - 1).equals(File.separator)) {
-            Main.outputDir += File.separator;
+        Logger.getLogger("WidgetTreeQuery").log(Level.INFO, "Save screenshot for id: " + identifier);
+        // save the file to disk
+        var screenshotPath = Paths.get(location.toString(), identifier + ".png");
+        var screenshotFile = new File(screenshotPath.toUri());
+
+        if (!screenshotFile.exists()) {
+            try {
+                var outputStream = new FileOutputStream(screenshotFile.getCanonicalFile());
+                outputStream.write(recordBytes.toStream());
+                outputStream.flush();
+                outputStream.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        // see if we have a directory for the screenshots yet
-        File screenshotDir = new File(modelDifferenceReportDirectory + File.separator);
+        return new File(screenshotFile.getName()).getPath();
+
+         // see if we have a directory for the screenshots yet
+        //File screenshotDir = new File(modelDifferenceReportDirectory + File.separator);
 
         // save the file to disk
-        File screenshotFile = new File(screenshotDir, identifier + ".png");
+/*        File screenshotFile = new File(screenshotDir, identifier + ".png");
         if (screenshotFile.exists()) {
             return new File(screenshotFile.getName()).getPath();
         }
@@ -171,8 +180,8 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
         }
 
         return new File(screenshotFile.getName()).getPath();
+        */
     }
-    */
 
     /**
      * This method transforms a resultset of nodes into elements.
@@ -180,7 +189,7 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
      * @param className
      * @return
      */
-    private ArrayList<Element> fetchNodes(OResultSet resultSet, String className, String parent, String modelIdentifier) {
+    private ArrayList<Element> fetchNodes(Path location, OResultSet resultSet, String className, String parent, String modelIdentifier) {
         ArrayList<Element> elements = new ArrayList<>();
 
         while (resultSet.hasNext()) {
@@ -198,7 +207,7 @@ public class WidgetTreeQuery implements IWidgetTreeQuery{
                     }
                     if (propertyName.equals("screenshot")) {
                         // process the screenshot separately
-         //               processScreenShot(stateVertex.getProperty("screenshot"), "n" + formatId(stateVertex.getIdentity().toString()), modelIdentifier);
+                        processScreenShot(location, stateVertex.getProperty("screenshot"), "n" + formatId(stateVertex.getIdentity().toString()), modelIdentifier);
                         continue;
                     }
                     jsonVertex.addProperty(propertyName, stateVertex.getProperty(propertyName).toString());

@@ -154,17 +154,10 @@ public class HtmlOutput implements IOutputDifferences {
 
             var incomingActionsModelTwo = newStateModelTwo.getIncomingActions();
 
-            // Set<Pair<String, String>> incomingActionsModelTwo = modelDifferenceDatabase.incomingActionsIdDesc(identifierModelTwo, newStateModelTwo);
-            //       incomingActionsModelTwo.remove(new Pair<String, String>(null,""));
-
-
             var disappearedAbstractStates = differences.getRemovedStates();
             for(var dissStateModelOne :  disappearedAbstractStates) {
 
                 var incomingActionsModelOne = dissStateModelOne.getIncomingActions();
-
-                // Set<Pair<String, String>> incomingActionsModelOne = modelDifferenceDatabase.incomingActionsIdDesc(identifierModelOne, dissStateModelOne);
-                // incomingActionsModelOne.remove(new Pair<String, String>(null,""));
 
                 var intersection = Sets.intersection(incomingActionsModelTwo, incomingActionsModelOne);
 
