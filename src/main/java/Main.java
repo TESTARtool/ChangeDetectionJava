@@ -64,7 +64,6 @@ public class Main {
                     .addSingleton(IStateManagementTags.class, StateManagementTags.class )
                     .addSingleton(IApplication.class, ModelDifferenceApplication.class)
                     .addSingleton(ISettingProvider.class, settingsProvider)
-                    .addSingleton(IOrientDbSetting.class, OrientDbSetting.class)
                     .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
                     .addSingleton(IApplicationBuilder.class, OrientDbApplicationBuilder.class)
                     .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)

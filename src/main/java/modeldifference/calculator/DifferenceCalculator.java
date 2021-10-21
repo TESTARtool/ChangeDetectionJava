@@ -1,14 +1,10 @@
 package modeldifference.calculator;
 
-import com.orientechnologies.orient.core.record.impl.ORecordBytes;
 import modeldifference.models.*;
-import modeldifference.orient.IODatabaseSession;
 import modeldifference.orient.IOrientDbFactory;
-import modeldifference.orient.IOrientDbSetting;
 import modeldifference.orient.entity.AbstractActionEntity;
 import modeldifference.orient.entity.AbstractStateEntity;
 import modeldifference.orient.entity.ConcreteActionEntity;
-import modeldifference.orient.entity.ConcreteStateEntity;
 import modeldifference.orient.query.IAbstractActionEntityQuery;
 import modeldifference.orient.query.IAbstractStateEntityQuery;
 import modeldifference.orient.query.IConcreteActionEntityQuery;
