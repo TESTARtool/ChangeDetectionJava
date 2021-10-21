@@ -18,7 +18,7 @@ import application.settings.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Main {
+public class Program {
 
     public static void main(String[] args) {
 

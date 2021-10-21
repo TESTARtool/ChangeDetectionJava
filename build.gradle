@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'nl.ou.testar'
-version '0.1.0-init'
+version '1.0.0'
 
 repositories {
     mavenCentral()
@@ -24,6 +24,15 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'Program'
+    }
+    from {
+        configurations.runtimeClasspath.collect {it.isDirectory() ? it: zipTree(it)}
+    }
 }
 
 sonarqube {
