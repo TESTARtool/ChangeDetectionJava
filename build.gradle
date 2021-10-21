@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'nl.ou.testar'
-version '0.1.0-init'
+version '1.0.0'
 
 repositories {
     mavenCentral()
