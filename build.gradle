@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id "org.sonarqube" version "3.3"
+}
+
+group 'nl.ou.testar'
+version '0.1.0-init'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'com.orientechnologies:orientdb-client:3.0.34'
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'org.mockito:mockito-all:1.10.19'
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.guava:guava:26.0-jre'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "model-difference"
+        property "sonar.organization", "rn-study"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
