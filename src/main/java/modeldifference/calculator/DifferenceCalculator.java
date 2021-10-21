@@ -125,7 +125,7 @@ public class DifferenceCalculator implements IDifferenceCalculator {
                             .findFirst()
                             .orElse(new ConcreteActionEntity(new ConcreteActionId(""), "TILT"));
 
-                    outgoingActions.add(new AbstractAction(action.getId(), concreteActionEntity.getDescription()));
+                    incomingActions.add(new AbstractAction(action.getId(), concreteActionEntity.getDescription()));
                 }
 
                 addedStates.add(new AbstractState(addedState.getId(), concreteStates, outgoingActions, incomingActions));

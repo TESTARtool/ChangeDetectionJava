@@ -154,12 +154,26 @@ public class HtmlOutput implements IOutputDifferences {
 
             var incomingActionsModelTwo = newStateModelTwo.getIncomingActions();
 
+            var two = new HashSet<Pair<String, String>>();
+
+            for (var incommingAction: incomingActionsModelTwo){
+                 two.add(new Pair<>(incommingAction.getId().getValue(), incommingAction.getDescription()));
+            }
+
             var disappearedAbstractStates = differences.getRemovedStates();
             for(var dissStateModelOne :  disappearedAbstractStates) {
 
                 var incomingActionsModelOne = dissStateModelOne.getIncomingActions();
 
-                var intersection = Sets.intersection(incomingActionsModelTwo, incomingActionsModelOne);
+                var one = new HashSet<Pair<String, String>>();
+
+                for (var incommingAction: incomingActionsModelOne){
+                    one.add(new Pair<>(incommingAction.getId().getValue(), incommingAction.getDescription()));
+                }
+
+             //   incomingActionsModelTwo.remove(new Pair<String, String>(null,""));
+
+                var intersection = Sets.intersection(two, one);
 
                 if (!intersection.isEmpty()){
                     // Create the Image Difference
@@ -250,7 +264,7 @@ public class HtmlOutput implements IOutputDifferences {
         }
 
         out.println("<div class=<\"float\">");
-        out.println("<p><img src=\"" + screenshotFile.getPath() + "\"></p>");
+        out.println("<p><img src=\"" + abstractState.getId().getValue() + ".png" + "\"></p>");
         out.println("<h4> Disappeared Actions of this State, Concrete Description </h4>");
         out.flush();
     }
@@ -279,9 +293,9 @@ public class HtmlOutput implements IOutputDifferences {
     }
 
     public void addSpecificStateChange(Path oldStateImage, Path newStateImage, Path diffStateImage) {
-        out.println("<p><img src=\"" + oldStateImage.toString() + "\">");
-        out.println("<img src=\"" + newStateImage.toString() + "\">");
-        out.println("<img src=\"" + diffStateImage.toString() + "\"></p>");
+        out.println("<p><img src=\"" + oldStateImage.getFileName() + "\">");
+        out.println("<img src=\"" + newStateImage.getFileName() + "\">");
+        out.println("<img src=\"" + diffStateImage.getFileName() + "\"></p>");
         out.flush();
     }
 

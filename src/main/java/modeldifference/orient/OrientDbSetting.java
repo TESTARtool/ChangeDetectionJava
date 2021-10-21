@@ -4,7 +4,7 @@ import com.orientechnologies.orient.core.db.OrientDBConfig;
 
 public class OrientDbSetting implements IOrientDbSetting {
     public String getUrl() {
-        return "remote:192.168.188.69";
+        return "remote:192.168.188.74";
     }
 
     public String getDatabaseName() {
