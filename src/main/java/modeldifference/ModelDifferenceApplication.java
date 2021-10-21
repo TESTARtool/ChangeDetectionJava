@@ -1,19 +1,19 @@
 package modeldifference;
 
+import application.IApplication;
 import modeldifference.calculator.IDifferenceCalculator;
-import settings.ISettingProvider;
-import settings.ISettingsFor;
+import application.settings.ISettingProvider;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ModelDifferenceApplication implements IApplication {
     private final ISettingProvider settingProvider;
-    private final IApplicationBuilder applicationBuilder;
+    private final IModelApplicationBuilder applicationBuilder;
     private final IDifferenceCalculator differenceCalculator;
     private final IOutputDifferences outputDifferences;
 
-    public ModelDifferenceApplication(ISettingProvider settingProvider, IApplicationBuilder applicationBuilder, IDifferenceCalculator differenceCalculator, IOutputDifferences outputDifferences){
+    public ModelDifferenceApplication(ISettingProvider settingProvider, IModelApplicationBuilder applicationBuilder, IDifferenceCalculator differenceCalculator, IOutputDifferences outputDifferences){
         this.settingProvider = settingProvider;
         this.applicationBuilder = applicationBuilder;
         this.differenceCalculator = differenceCalculator;
@@ -25,7 +25,7 @@ public class ModelDifferenceApplication implements IApplication {
         var applicationSettings = settingProvider.resolve(ApplicationSettings.class);
 
         if (!applicationSettings.isValid()){
-            Logger.getLogger("Application").log(Level.SEVERE, "Application settings are invalid");
+            Logger.getLogger("Application").log(Level.SEVERE, "Application application.settings are invalid");
             return;
         }
 

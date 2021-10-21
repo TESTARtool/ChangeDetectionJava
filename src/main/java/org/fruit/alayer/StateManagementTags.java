@@ -252,7 +252,7 @@ public class StateManagementTags implements IStateManagementTags {
     };
 
 
-    // a bi-directional mapping from the state management tags to a string equivalent for use in the settings file
+    // a bi-directional mapping from the state management tags to a string equivalent for use in the application.settings file
     private static BiMap<Tag<?>, String> settingsMap = HashBiMap.create(stateManagementTags.size());
     static {
         settingsMap.put(WidgetControlType, "WidgetControlType");

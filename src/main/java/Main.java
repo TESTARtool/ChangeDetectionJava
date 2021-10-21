@@ -1,12 +1,10 @@
-import com.google.gson.*;
-import dependencyinjection.ServiceProviderBuilder;
+import application.IApplication;
+import application.dependencyinjection.ServiceProviderBuilder;
 import modeldifference.*;
 import modeldifference.calculator.*;
 import modeldifference.htmloutput.HtmlOutput;
 import modeldifference.htmloutput.IStateModelDifferenceJsonWidget;
 import modeldifference.htmloutput.StateModelDifferenceJsonWidget;
-import modeldifference.models.AbstractActionId;
-import modeldifference.models.Identifier;
 import modeldifference.orient.*;
 import modeldifference.orient.query.*;
 import org.fruit.alayer.IStateManagementTags;
@@ -15,36 +13,14 @@ import org.fruit.alayer.IWdMapping;
 import org.fruit.alayer.StateManagementTags;
 import org.fruit.alayer.webdriver.enums.WdMapping;
 import org.fruit.alayer.windows.UIAMapping;
-import settings.*;
+import application.settings.*;
 
-import java.lang.reflect.Type;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
 
-    class IdentifierJsonSerializer implements JsonSerializer<Identifier>, JsonDeserializer<AbstractActionId>{
-
-        public JsonElement serialize(Identifier src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getValue());
-        }
-
-        public AbstractActionId deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            if (json.isJsonPrimitive()){
-                return new AbstractActionId(json.getAsString());
-            }
-
-            return null;
-        }
-    }
-
-    public static void ShowHelp(){
-        System.out.println("this is not very helpful help");
-    }
-
     public static void main(String[] args) {
-
-        Logger.getGlobal().setLevel(Level.SEVERE);
 
         var settingsProvider = new SettingsProviderBuilder()
                 .add(new ArgumentSettingsParser(args))
@@ -52,36 +28,40 @@ public class Main {
 
         var isHelpQuested = settingsProvider.containsSetting("help");
 
-        if (isHelpQuested) {
-            ShowHelp();
-        } else {
+        var serviceProviderBuilder = new ServiceProviderBuilder()
+            .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
+            .addSingleton(IWdMapping.class, WdMapping.class)
+            .addSingleton(IUIAMapping.class, UIAMapping.class)
+            .addSingleton(IStateManagementTags.class, StateManagementTags.class )
+            .addSingleton(ISettingProvider.class, settingsProvider)
+            .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
+            .addSingleton(IModelApplicationBuilder.class, OrientDbApplicationBuilder.class)
+            .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)
+            .addSingleton(IOutputDifferences.class, HtmlOutput.class)
+            .addSingleton(IAbstractStateModelEntityQuery.class, AbstractStateModelEntityQuery.class)
+            .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
+            .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
+            .addSingleton(IAbstractActionEntityQuery.class, AbstractActionEntityQuery.class)
+            .addSingleton(IConcreteStateEntityQuery.class, ConcreteStateEntityQuery.class)
+            .addSingleton(IWidgetTreeQuery.class, WidgetTreeQuery.class)
+            ;
 
-            var serviceProvider = new ServiceProviderBuilder()
-                    .addSingleton(IWidgetTreeQuery.class, WidgetTreeQuery.class)
-                    .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
-                    .addSingleton(IWdMapping.class, WdMapping.class)
-                    .addSingleton(IUIAMapping.class, UIAMapping.class)
-                    .addSingleton(IStateManagementTags.class, StateManagementTags.class )
-                    .addSingleton(IApplication.class, ModelDifferenceApplication.class)
-                    .addSingleton(ISettingProvider.class, settingsProvider)
-                    .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
-                    .addSingleton(IApplicationBuilder.class, OrientDbApplicationBuilder.class)
-                    .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)
-                    .addSingleton(IAbstractStateModelEntityQuery.class, AbstractStateModelEntityQuery.class)
-                    .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
-                    .addSingleton(IOutputDifferences.class, HtmlOutput.class)
-                    .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
-                    .addSingleton(IAbstractActionEntityQuery.class, AbstractActionEntityQuery.class)
-                    .addSingleton(IConcreteStateEntityQuery.class, ConcreteStateEntityQuery.class)
-                    .buildServiceProvider();
+        if (isHelpQuested){
+            serviceProviderBuilder.addSingleton(IApplication.class, HelpApplication.class);
+        }
+        else
+        {
+            serviceProviderBuilder.addSingleton(IApplication.class, ModelDifferenceApplication.class);
+        }
 
-            try {
-                var application = serviceProvider.getService(IApplication.class);
-                application.Run();
-            }
-            catch (Exception ex){
-                ex.printStackTrace();
-            }
+        var serviceProvider = serviceProviderBuilder.buildServiceProvider();
+
+        try {
+            var application = serviceProvider.getService(IApplication.class);
+            application.Run();
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
         }
     }
 }

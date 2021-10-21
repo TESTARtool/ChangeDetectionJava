@@ -418,7 +418,7 @@ public class StateManagementTags {
         return stateManagementTags.contains(tag);
     }
 
-    // a bi-directional mapping from the state management tags to a string equivalent for use in the settings file
+    // a bi-directional mapping from the state management tags to a string equivalent for use in the application.settings file
     private static BiMap<Tag<?>, String> settingsMap = HashBiMap.create(stateManagementTags.size());
     static {
         settingsMap.put(WidgetControlType, "WidgetControlType");
@@ -859,7 +859,7 @@ public class StateManagementTags {
 
 
     /**
-     * This method returns the state management tag belonging to a given settings string.
+     * This method returns the state management tag belonging to a given application.settings string.
      * @param settingsString
      * @return
      */
@@ -868,7 +868,7 @@ public class StateManagementTags {
     }
 
     /**
-     * This method returns the settings string for a given state management tag.
+     * This method returns the application.settings string for a given state management tag.
      * @param tag
      * @return
      */

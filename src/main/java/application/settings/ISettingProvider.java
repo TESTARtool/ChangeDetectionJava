@@ -1,4 +1,4 @@
-package settings;
+package application.settings;
 
 import java.util.Optional;
 

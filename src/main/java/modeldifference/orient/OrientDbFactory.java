@@ -1,9 +1,8 @@
 package modeldifference.orient;
 
-import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.db.*;
-import settings.ISettingProvider;
-import settings.ISettingsFor;
+import application.settings.ISettingProvider;
+import application.settings.ISettingsFor;
 
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ public class OrientDbFactory implements IOrientDbFactory {
         }
 
         if (!settingsOrientDb.isValid()){
-            throw new RuntimeException("Orient Db settings invalid");
+            throw new RuntimeException("Orient Db application.settings invalid");
         }
 
         var settings = settingsOrientDb.getValue();

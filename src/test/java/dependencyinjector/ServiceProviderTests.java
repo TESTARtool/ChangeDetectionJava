@@ -1,6 +1,6 @@
 package dependencyinjector;
 
-import dependencyinjection.ServiceProviderBuilder;
+import application.dependencyinjection.ServiceProviderBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

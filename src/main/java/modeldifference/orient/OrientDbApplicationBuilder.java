@@ -1,15 +1,13 @@
 package modeldifference.orient;
 
-import modeldifference.IApplicationBuilder;
+import modeldifference.IModelApplicationBuilder;
 import modeldifference.models.*;
-import com.orientechnologies.orient.core.record.ODirection;
 import modeldifference.orient.query.IAbstractStateEntityQuery;
 import modeldifference.orient.query.IAbstractStateModelEntityQuery;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class OrientDbApplicationBuilder implements IApplicationBuilder {
+public class OrientDbApplicationBuilder implements IModelApplicationBuilder {
 
     private final IAbstractStateModelEntityQuery abstractStateModelQuery;
     private final IAbstractStateEntityQuery abstractStateEntityQuery;
