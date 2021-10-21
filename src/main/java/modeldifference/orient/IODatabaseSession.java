@@ -7,6 +7,6 @@ import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import java.io.Closeable;
 import java.util.Map;
 
-public interface IODatabaseSession extends Closeable {
+public interface IODatabaseSession {
     OResultSet query(String query, Map args) throws OCommandSQLParsingException, OCommandExecutionException;
 }

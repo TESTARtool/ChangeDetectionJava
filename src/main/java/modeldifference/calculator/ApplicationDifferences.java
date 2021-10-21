@@ -29,4 +29,6 @@ public class ApplicationDifferences {
     }
     public Application getFirstVersion() { return firstVersion;}
     public Application getSecondVersion() { return secondVersion;}
+
+
 }

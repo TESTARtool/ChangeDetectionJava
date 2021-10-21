@@ -7,5 +7,5 @@ import modeldifference.orient.entity.AbstractActionEntity;
 import java.util.Optional;
 
 public interface IAbstractActionEntityQuery {
-    Optional<AbstractActionEntity> query(AbstractActionId id, IODatabaseSession sessionDb);
+    Optional<AbstractActionEntity> query(AbstractActionId id);
 }

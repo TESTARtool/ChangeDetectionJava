@@ -1,7 +1,7 @@
 package dependencyinjector;
 
-import dependencyinjection.ServiceDescriptor;
-import dependencyinjection.ServiceLifetime;
+import application.dependencyinjection.ServiceDescriptor;
+import application.dependencyinjection.ServiceLifetime;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

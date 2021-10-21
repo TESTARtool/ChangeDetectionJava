@@ -1,23 +1,21 @@
 package modeldifference.orient;
 
 import com.orientechnologies.orient.core.db.OrientDBConfig;
+import application.settings.IsSetting;
 
-public class OrientDbSetting implements IOrientDbSetting {
-    public String getUrl() {
-        return "remote:192.168.188.66";
-    }
+public class OrientDbSetting {
 
-    public String getDatabaseName() {
-        return "testar";
-    }
+    @IsSetting(name = "OrientDb:url", description = "Url of the OrientDb location, start with 'remote' to connect to a remote location")
+    public String url;
 
-    public String getUserName() {
-        return "testar";
-    }
+    @IsSetting(name = "OrientDb:databaseName", description = "Name of the TESTAR database")
+    public String databaseName;
 
-    public String getPassword() {
-        return "testar";
-    }
+    @IsSetting(name = "OrientDb:userName", description = "Username of the TESTAR database")
+    public String userName;
+
+    @IsSetting(name = "OrientDb:password", description = "Password of the TESTAR database (not the root).")
+    public String password;
 
     public OrientDBConfig getConfig() {
         return OrientDBConfig.defaultConfig();

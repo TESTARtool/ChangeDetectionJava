@@ -1,20 +1,80 @@
 package modeldifference.htmloutput;
 
+import com.google.common.collect.Sets;
+import es.upv.staq.testar.StateManagementTags;
 import modeldifference.IOutputDifferences;
 import modeldifference.calculator.ApplicationDifferences;
+import modeldifference.calculator.StateModelDifferenceImages;
 import modeldifference.models.AbstractAction;
 import modeldifference.models.AbstractState;
+import org.fruit.Pair;
+import org.fruit.alayer.IStateManagementTags;
+import org.fruit.alayer.IUIAMapping;
+import org.fruit.alayer.IWdMapping;
+import org.fruit.alayer.Tag;
+import org.fruit.alayer.webdriver.enums.WdMapping;
+import org.fruit.alayer.windows.UIAMapping;
 
 import java.io.*;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HtmlOutput implements IOutputDifferences {
 
     public final static String CHARSET = "UTF-8";
+    private final IUIAMapping uiaMapping;
+    private final IWdMapping wdMapping;
+    private final IStateManagementTags stateManagementTags;
+    private final IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget;
+
+    public HtmlOutput(IUIAMapping uiaMapping, IWdMapping wdMapping, IStateManagementTags stateManagementTags, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget){
+        this.uiaMapping = uiaMapping;
+        this.wdMapping = wdMapping;
+        this.stateManagementTags = stateManagementTags;
+        this.stateModelDifferenceJsonWidget = stateModelDifferenceJsonWidget;
+    }
+
+    private final boolean overwriteExistingRun = true;
+    private final String outputDirectory  = "out";
+
+    private void deleteDirectoryAndItContents(Path path){
+        try(var files = Files.walk(path)){
+
+            files.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::deleteOnExit);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private String generateDifferenceName(ApplicationDifferences differences){
+        return differences.getFirstVersion().getName() + "_" + differences.getFirstVersion().getVersion()
+               + "_diff_" +
+               differences.getSecondVersion().getName() + "_" + differences.getSecondVersion().getVersion();
+    }
 
     public void output(ApplicationDifferences differences) {
-        this.htmlFilename = "DifferenceReport.html";
+        var diffName = generateDifferenceName(differences);
+
+        var path = Paths.get(outputDirectory, diffName);
+
+        if (Files.exists(path) && overwriteExistingRun){
+            deleteDirectoryAndItContents(path);
+        }
+
         try {
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+
+            this.htmlFilename = outputDirectory + File.separator + diffName + File.separator + "DifferenceReport.html";
+
             this.out = new PrintWriter(new File(htmlFilename).getCanonicalPath(), CHARSET);
 
             for(String s : HEADER){
@@ -22,14 +82,11 @@ public class HtmlOutput implements IOutputDifferences {
                 out.flush();
             }
 
-            addStateAndActionsToHtml(differences.getRemovedStates());
-            addStateAndActionsToHtml(differences.getAddedStates());
+            addStateAndActionsToHtml(differences.getRemovedStates(), path);
+            addStateAndActionsToHtml(differences.getAddedStates(),path);
+            addImageOrWidgetTreeComparison(differences, path);
 
-            // Image or Widget Tree comparison
-            startSpecificStateChanges();
-
-            closeHTMLreport();
-
+            closeHtmlReport();
 
         } catch (IOException e) {
             System.out.println("ERROR: Unable to start the State Model Difference Report : " + htmlFilename);
@@ -37,13 +94,124 @@ public class HtmlOutput implements IOutputDifferences {
         }
     }
 
-    private void addStateAndActionsToHtml(List<AbstractState> states){
+
+    private Set<Tag<?>> abstractAttributesTags(ApplicationDifferences differences){
+
+        // Update Set object "abstractAttributesTags" with the Tags
+        // we need to check for Widget Tree difference
+        var stateModelTags =  differences.getFirstVersion().getAttributes();
+
+        var mangementTags = stateModelTags.stream()
+                .map(this::capitalizeWordsAndRemoveSpaces)
+                .map(x -> stateManagementTags.getTagFromSettingsString(x))
+                .collect(Collectors.toSet());
+
+        var tags = new HashSet<Tag<?>>();
+
+        mangementTags.stream()
+                .map(x -> uiaMapping.getMappedStateTag(x))
+                .filter(Optional::isPresent)
+                .map(x -> (Tag<?>) x.get())
+                .forEach(tags::add);
+
+        mangementTags.stream()
+                .map(x -> wdMapping.getMappedStateTag(x))
+                .filter(x -> x.isPresent())
+                .map(x -> (Tag<?>) x.get())
+                .forEach(tags::add);
+
+        return tags;
+    }
+
+    /**
+     * Helper class to transform State Model String attribute
+     * into a StateManagementTag Setting String
+     *
+     * From: widget control type
+     * To: WidgetControlType
+     *
+     * @return
+     */
+    private String capitalizeWordsAndRemoveSpaces(String attribute) {
+        String words[] = attribute.split("\\s");
+        StringBuilder capitalizeWord = new StringBuilder("");
+        for(String w : words){
+            String first = w.substring(0,1);
+            String afterfirst = w.substring(1);
+            capitalizeWord.append(first.toUpperCase() + afterfirst);
+        }
+        return capitalizeWord.toString().trim();
+    }
+
+    private void addImageOrWidgetTreeComparison(ApplicationDifferences differences, Path path){
+        // Image or Widget Tree comparison
+        startSpecificStateChanges();
+
+        var abstractAttributesTags = abstractAttributesTags(differences);
+        var newAbstractStates = differences.getAddedStates();
+
+        for(var newStateModelTwo :  newAbstractStates) {
+
+            var incomingActionsModelTwo = newStateModelTwo.getIncomingActions();
+
+            var two = new HashSet<Pair<String, String>>();
+
+            for (var incommingAction: incomingActionsModelTwo){
+                 two.add(new Pair<>(incommingAction.getId().getValue(), incommingAction.getDescription()));
+            }
+
+            var disappearedAbstractStates = differences.getRemovedStates();
+            for(var dissStateModelOne :  disappearedAbstractStates) {
+
+                var incomingActionsModelOne = dissStateModelOne.getIncomingActions();
+
+                var one = new HashSet<Pair<String, String>>();
+
+                for (var incommingAction: incomingActionsModelOne){
+                    one.add(new Pair<>(incommingAction.getId().getValue(), incommingAction.getDescription()));
+                }
+
+             //   incomingActionsModelTwo.remove(new Pair<String, String>(null,""));
+
+                var intersection = Sets.intersection(two, one);
+
+                if (!intersection.isEmpty()){
+                    // Create the Image Difference
+                    var diffDisk = StateModelDifferenceImages.getDifferenceImage(
+                            dissStateModelOne.getScreenshot(), dissStateModelOne.getId(),
+                            newStateModelTwo.getScreenshot(), newStateModelTwo.getId(),
+                            path);
+
+                    if (diffDisk.isPresent()) {
+
+                        var locationScreenshotOne = Paths.get(path.toString(), dissStateModelOne.getId().getValue() + ".png");
+                        var locationScreenshotTwo = Paths.get(path.toString(), newStateModelTwo.getId().getValue() + ".png");
+
+                        addSpecificStateChange(locationScreenshotOne, locationScreenshotTwo, diffDisk.get());
+                    }
+
+                    addSpecificActionReached(intersection.toString());
+
+                    // Widget Tree Abstract Properties Difference
+                    var widgetTreeDifference = stateModelDifferenceJsonWidget.jsonWidgetTreeDifference(abstractAttributesTags, path, dissStateModelOne, newStateModelTwo);
+
+                    for(var widgetInformation : widgetTreeDifference) {
+                        addSpecificWidgetInfo(widgetInformation);
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    private void addStateAndActionsToHtml(List<AbstractState> states, Path outputLocation){
         startDisappearedAbstractStates(states.size());
 
         for (var state: states){
-            addDisappearedAbstractState(state);
+            addDisappearedAbstractState(state, outputLocation);
 
-            for (var action : state.getActions()) {
+            for (var action : state.getOutgoingActions()) {
                 addActionDescription(action);
             }
 
@@ -58,11 +226,11 @@ public class HtmlOutput implements IOutputDifferences {
             "<!DOCTYPE html>",
             "<html>",
             "<style>",
-            ".container {display: flex;}",
-            ".float {display:inline-block;}",
+            "   .container {display: flex;}",
+            "   .float {display:inline-block;}",
             "</style>",
             "<head>",
-            "<title>TESTAR State Model difference report</title>",
+            "   <title>TESTAR State Model difference report</title>",
             "</head>",
             "<body>"
     };
@@ -77,12 +245,14 @@ public class HtmlOutput implements IOutputDifferences {
         out.flush();
     }
 
-    public void addDisappearedAbstractState(AbstractState abstractState) {
+    public void addDisappearedAbstractState(AbstractState abstractState, Path outputLocation) {
         // save the file to disk
-        File screenshotFile = new File(abstractState.getId().getValue() + ".png");
+        var screenshotPath = Paths.get(outputLocation.toString(), abstractState.getId().getValue() + ".png");
+        var screenshotFile = new File(screenshotPath.toUri());
+
         if (!screenshotFile.exists()) {
             try {
-                FileOutputStream outputStream = new FileOutputStream(screenshotFile.getCanonicalPath());
+                var outputStream = new FileOutputStream(screenshotFile.getCanonicalFile());
                 outputStream.write(abstractState.getScreenshot());
                 outputStream.flush();
                 outputStream.close();
@@ -94,7 +264,7 @@ public class HtmlOutput implements IOutputDifferences {
         }
 
         out.println("<div class=<\"float\">");
-        out.println("<p><img src=\"" + screenshotFile.getPath() + "\"></p>");
+        out.println("<p><img src=\"" + abstractState.getId().getValue() + ".png" + "\"></p>");
         out.println("<h4> Disappeared Actions of this State, Concrete Description </h4>");
         out.flush();
     }
@@ -122,10 +292,10 @@ public class HtmlOutput implements IOutputDifferences {
         out.flush();
     }
 
-    public void addSpecificStateChange(String oldStateImage, String newStateImage, String diffStateImage) {
-        out.println("<p><img src=\"" + oldStateImage + "\">");
-        out.println("<img src=\"" + newStateImage + "\">");
-        out.println("<img src=\"" + diffStateImage + "\"></p>");
+    public void addSpecificStateChange(Path oldStateImage, Path newStateImage, Path diffStateImage) {
+        out.println("<p><img src=\"" + oldStateImage.getFileName() + "\">");
+        out.println("<img src=\"" + newStateImage.getFileName() + "\">");
+        out.println("<img src=\"" + diffStateImage.getFileName() + "\"></p>");
         out.flush();
     }
 
@@ -144,7 +314,9 @@ public class HtmlOutput implements IOutputDifferences {
         out.flush();
     }
 
-    public void closeHTMLreport() {
+    public void closeHtmlReport() {
+        out.println("</body>");
+        out.println("</html>");
         out.flush();
         out.close();
     }

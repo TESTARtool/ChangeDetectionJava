@@ -1,81 +1,67 @@
-import com.google.gson.*;
-import dependencyinjection.ServiceProviderBuilder;
-import modeldifference.IApplicationBuilder;
-import modeldifference.IOutputDifferences;
+import application.IApplication;
+import application.dependencyinjection.ServiceProviderBuilder;
+import modeldifference.*;
 import modeldifference.calculator.*;
 import modeldifference.htmloutput.HtmlOutput;
-import modeldifference.models.AbstractActionId;
-import modeldifference.models.Identifier;
+import modeldifference.htmloutput.IStateModelDifferenceJsonWidget;
+import modeldifference.htmloutput.StateModelDifferenceJsonWidget;
 import modeldifference.orient.*;
 import modeldifference.orient.query.*;
+import org.fruit.alayer.IStateManagementTags;
+import org.fruit.alayer.IUIAMapping;
+import org.fruit.alayer.IWdMapping;
+import org.fruit.alayer.StateManagementTags;
+import org.fruit.alayer.webdriver.enums.WdMapping;
+import org.fruit.alayer.windows.UIAMapping;
+import application.settings.*;
 
-import java.lang.reflect.Type;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Program {
 
-    class IdentifierJsonSerializer implements JsonSerializer<Identifier>, JsonDeserializer<AbstractActionId>{
+    public static void main(String[] args) {
 
-        public JsonElement serialize(Identifier src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getValue());
+        var settingsProvider = new SettingsProviderBuilder()
+                .add(new ArgumentSettingsParser(args))
+                .buildSettingsProvider();
+
+        var isHelpQuested = settingsProvider.containsSetting("help");
+
+        var serviceProviderBuilder = new ServiceProviderBuilder()
+            .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
+            .addSingleton(IWdMapping.class, WdMapping.class)
+            .addSingleton(IUIAMapping.class, UIAMapping.class)
+            .addSingleton(IStateManagementTags.class, StateManagementTags.class )
+            .addSingleton(ISettingProvider.class, settingsProvider)
+            .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
+            .addSingleton(IModelApplicationBuilder.class, OrientDbApplicationBuilder.class)
+            .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)
+            .addSingleton(IOutputDifferences.class, HtmlOutput.class)
+            .addSingleton(IAbstractStateModelEntityQuery.class, AbstractStateModelEntityQuery.class)
+            .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
+            .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
+            .addSingleton(IAbstractActionEntityQuery.class, AbstractActionEntityQuery.class)
+            .addSingleton(IConcreteStateEntityQuery.class, ConcreteStateEntityQuery.class)
+            .addSingleton(IWidgetTreeQuery.class, WidgetTreeQuery.class)
+            ;
+
+        if (isHelpQuested){
+            serviceProviderBuilder.addSingleton(IApplication.class, HelpApplication.class);
+        }
+        else
+        {
+            serviceProviderBuilder.addSingleton(IApplication.class, ModelDifferenceApplication.class);
         }
 
-        public AbstractActionId deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            if (json.isJsonPrimitive()){
-                return new AbstractActionId(json.getAsString());
-            }
+        var serviceProvider = serviceProviderBuilder.buildServiceProvider();
 
-            return null;
+        try {
+            var application = serviceProvider.getService(IApplication.class);
+            application.Run();
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        var serviceProvider = new ServiceProviderBuilder()
-                .addSingleton(IOrientDbSetting.class, OrientDbSetting.class)
-                .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
-                .addSingleton(IApplicationBuilder.class, OrientDbApplicationBuilder.class)
-                .addSingleton(IDifferenceCalculator.class, DifferenceCalculator.class)
-                .addSingleton(IAbstractStateModelEntityQuery.class, AbstractStateModelEntityQuery.class)
-                .addSingleton(IAbstractStateEntityQuery.class, AbstractStateEntityQuery.class)
-                .addSingleton(IOutputDifferences.class, HtmlOutput.class)
-                .addSingleton(IConcreteActionEntityQuery.class, ConcreteActionEntityQuery.class)
-                .addSingleton(IAbstractActionEntityQuery.class, AbstractActionEntityQuery.class)
-                .addSingleton(IConcreteStateEntityQuery.class, ConcreteStateEntityQuery.class)
-                .buildServiceProvider()
-                ;
-
-
-        var applicationBuilder = serviceProvider.getService(IApplicationBuilder.class);
-        var applicationVersion1 = applicationBuilder.getApplication("exp", 1);
-        var applicationVersion2 = applicationBuilder.getApplication("exp", 2);
-
-        if (applicationVersion1.isEmpty()){
-            var message = String.format("Unable to find application '%s' with version '%s'", "exp", 1);
-            Logger.getLogger("Main").log(Level.SEVERE, message);
-            return;
+        catch (Exception ex){
+            ex.printStackTrace();
         }
-
-        if (applicationVersion2.isEmpty()){
-            var message = String.format("Unable to find application '%s' with version '%s'", "exp", 2);
-            Logger.getLogger("Main").log(Level.SEVERE, message);
-            return;
-        }
-
-        var differenceCalculator = serviceProvider.getService(IDifferenceCalculator.class);
-
-        var differences = differenceCalculator.findApplicationDifferences(applicationVersion1.get(), applicationVersion2.get());
-
-        var difOutputter = serviceProvider.getService(IOutputDifferences.class);
-
-        difOutputter.output(differences);
-
-        var gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
-        var json = gson.toJson(applicationVersion1);
-        System.out.println(json);
-                   System.out.println("--------");
     }
 }

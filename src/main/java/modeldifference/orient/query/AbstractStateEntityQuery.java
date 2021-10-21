@@ -7,6 +7,7 @@ import modeldifference.models.AbstractActionId;
 import modeldifference.models.AbstractStateId;
 import modeldifference.models.ModelIdentifier;
 import modeldifference.orient.IODatabaseSession;
+import modeldifference.orient.IOrientDbFactory;
 import modeldifference.orient.OrientDbCommand;
 import modeldifference.orient.entity.AbstractStateEntity;
 
@@ -15,27 +16,34 @@ import java.util.stream.Collectors;
 
 public class AbstractStateEntityQuery implements IAbstractStateEntityQuery {
 
-    public List<AbstractStateEntity> query(ModelIdentifier modelIdentifier, IODatabaseSession sessionDB){
-        var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier";
+    private final IOrientDbFactory orientDbFactory;
+
+    public AbstractStateEntityQuery(IOrientDbFactory orientDbFactory){
+
+        this.orientDbFactory = orientDbFactory;
+    }
+
+    public List<AbstractStateEntity> query(ModelIdentifier modelIdentifier){
+        var sql = "SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier";
 
         var command = new OrientDbCommand(sql)
                 .addParameter("modelIdentifier", modelIdentifier);
 
-        try(var resultSet = command.executeReader(sessionDB)){
+        try(var resultSet = command.executeReader(orientDbFactory)){
             return resultSet.vertexStream()
                     .map(this::mapToAbstractState)
                     .collect(Collectors.toList());
         }
     }
 
-    public Optional<AbstractStateEntity> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId, IODatabaseSession sessionDB){
-        var sql = "SELECT FROM AbstractState where modelIdentifier = :modelIdentifier AND stateId = :abstractStateId";
+    public Optional<AbstractStateEntity> query(ModelIdentifier modelIdentifier, AbstractStateId abstractStateId){
+        var sql = "SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier AND stateId = :abstractStateId";
 
         var command = new OrientDbCommand(sql)
                 .addParameter("modelIdentifier", modelIdentifier)
-                .addParameter("abstractActionId", abstractStateId);
+                .addParameter("abstractStateId", abstractStateId);
 
-        try(var resultSet = command.executeReader(sessionDB)){
+        try(var resultSet = command.executeReader(orientDbFactory)){
             return resultSet.vertexStream()
                     .map(this::mapToAbstractState)
                     .findFirst();

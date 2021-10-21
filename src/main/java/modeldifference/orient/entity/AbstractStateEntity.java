@@ -52,4 +52,6 @@ public class AbstractStateEntity {
 
     public List<AbstractActionId> getOutgoingActionIds() { return this.outgoingActionIds;}
 
+    public List<AbstractActionId> getIncomingActionIds() { return this.incomingActionIds; }
+
 }

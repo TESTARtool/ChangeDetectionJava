@@ -1,4 +1,4 @@
-package dependencyinjection;
+package application.dependencyinjection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
