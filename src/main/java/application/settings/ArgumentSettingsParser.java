@@ -15,8 +15,9 @@ public class ArgumentSettingsParser implements ISettingsParser {
     }
 
     private void parseArgument(String[] args) {
-        var settingsToParse = String.join(" ", args)
-                .split("-");
+
+        var settingsString = " " + String.join(" ", args);
+        var settingsToParse = settingsString.split(" -");
 
         for (var setting: settingsToParse){
             var nameValue = setting.split(" ");

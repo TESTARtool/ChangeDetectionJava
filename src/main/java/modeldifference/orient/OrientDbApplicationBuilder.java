@@ -17,7 +17,7 @@ public class OrientDbApplicationBuilder implements IModelApplicationBuilder {
         this.abstractStateEntityQuery = abstractStateEntityQuery;
     }
 
-    public Optional<Application> getApplication(String applicationName, int version) {
+    public Optional<Application> getApplication(String applicationName, String version) {
 
         try{
 

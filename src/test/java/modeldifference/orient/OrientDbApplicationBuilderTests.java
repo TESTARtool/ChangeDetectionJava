@@ -38,9 +38,9 @@ public class OrientDbApplicationBuilderTests {
     @Test
     void whenApplicationCannotBeFoundEmptyOptionalObjectIsReturned(){
 
-        when(abstractStateModelQueryMock.query("Not Found", 404)).thenReturn(Optional.empty());
+        when(abstractStateModelQueryMock.query("Not Found", "Not Found")).thenReturn(Optional.empty());
 
-        var application = sut.getApplication("Not Found", 404);
+        var application = sut.getApplication("Not Found", "Not Found");
 
         assertFalse(application.isPresent());
     }
@@ -51,16 +51,16 @@ public class OrientDbApplicationBuilderTests {
         attributes.add("att1");
         attributes.add("att2");
 
-        when(abstractStateModelQueryMock.query("TILT", 1)).thenReturn(Optional.of(new AbstractStateModel(1, "abc", attributes, "TILT")));
+        when(abstractStateModelQueryMock.query("TILT", "1")).thenReturn(Optional.of(new AbstractStateModel("1", "abc", attributes, "TILT")));
         when(abstractStateEntityQueryMock.query(new ModelIdentifier("abc"))).thenReturn(new ArrayList<AbstractStateEntity>());
 
-        var applicationOptional = sut.getApplication("TILT", 1);
+        var applicationOptional = sut.getApplication("TILT", "1");
 
         assertTrue(applicationOptional.isPresent());
         var application = applicationOptional.get();
 
         assertEquals("TILT", application.getName());
-        assertEquals(1, application.getVersion());
+        assertEquals("1", application.getVersion());
         assertEquals("abc", application.getAbstractIdentifier().getValue());
     }
 

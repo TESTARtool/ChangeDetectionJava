@@ -5,12 +5,12 @@ import modeldifference.models.ModelIdentifier;
 import java.util.Set;
 
 public class AbstractStateModel {
-    private int applicationVersion;
+    private String applicationVersion;
     private ModelIdentifier modelIdentifier;
     private Set<String> abstractionAttributes;
     private String applicationName;
 
-    public AbstractStateModel(int applicationVersion, String modelIdentifier, Set<String> abstractionAttributes, String applicationName){
+    public AbstractStateModel(String applicationVersion, String modelIdentifier, Set<String> abstractionAttributes, String applicationName){
 
         this.applicationVersion = applicationVersion;
         this.modelIdentifier = new ModelIdentifier(modelIdentifier);
@@ -18,7 +18,7 @@ public class AbstractStateModel {
         this.applicationName = applicationName;
     }
 
-    public int getApplicationVersion(){
+    public String getApplicationVersion(){
         return this.applicationVersion;
     }
 
