@@ -27,6 +27,7 @@ public class Program {
                 .buildSettingsProvider();
 
         var isHelpQuested = settingsProvider.containsSetting("help");
+        var isHelpQuested2 = settingsProvider.containsSetting("-help");
 
         var serviceProviderBuilder = new ServiceProviderBuilder()
             .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
@@ -46,7 +47,7 @@ public class Program {
             .addSingleton(IWidgetTreeQuery.class, WidgetTreeQuery.class)
             ;
 
-        if (isHelpQuested){
+        if (isHelpQuested || isHelpQuested2){
             serviceProviderBuilder.addSingleton(IApplication.class, HelpApplication.class);
         }
         else

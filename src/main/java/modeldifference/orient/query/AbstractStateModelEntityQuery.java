@@ -17,7 +17,7 @@ public class AbstractStateModelEntityQuery implements IAbstractStateModelEntityQ
         this.orientDbFactory = orientDbFactory;
     }
 
-    public Optional<AbstractStateModel> query(String applicationName, int version) {
+    public Optional<AbstractStateModel> query(String applicationName, String version) {
         var sql = "SELECT FROM AbstractStateModel WHERE " +
                 "applicationName = :applicationName AND " +
                 "applicationVersion = :applicationVersion";
@@ -36,7 +36,7 @@ public class AbstractStateModelEntityQuery implements IAbstractStateModelEntityQ
 
     private AbstractStateModel mapToAbstractStateModel(OVertex result){
         return new AbstractStateModel(
-                Integer.parseInt(result.getProperty("applicationVersion")),
+                result.getProperty("applicationVersion"),
                 result.getProperty("modelIdentifier"),
                 (Set)result.getProperty("abstractionAttributes"),
                 result.getProperty("applicationName")

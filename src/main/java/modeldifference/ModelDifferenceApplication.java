@@ -31,17 +31,17 @@ public class ModelDifferenceApplication implements IApplication {
 
         var settings = applicationSettings.getValue();
 
-        var application1 = applicationBuilder.getApplication(settings.applicationName1, Integer.parseInt(settings.applicationVersion1));
-        var application2 = applicationBuilder.getApplication(settings.applicationName2, Integer.parseInt(settings.applicationVersion2));
+        var application1 = applicationBuilder.getApplication(settings.applicationName1, settings.applicationVersion1);
+        var application2 = applicationBuilder.getApplication(settings.applicationName2, settings.applicationVersion2);
 
         if (application1.isEmpty()) {
-            var message = String.format("Unable to find application '%s' with version '%s'", settings.applicationName1, settings.applicationVersion1);
+            var message = String.format("Unable to find the first application '%s' with version '%s'", settings.applicationName1, settings.applicationVersion1);
             Logger.getLogger("Main").log(Level.SEVERE, message);
             return;
         }
 
         if (application2.isEmpty()) {
-            var message = String.format("Unable to find application '%s' with version '%s'", settings.applicationName2, settings.applicationVersion2);
+            var message = String.format("Unable to find the second application '%s' with version '%s'", settings.applicationName2, settings.applicationVersion2);
             Logger.getLogger("Main").log(Level.SEVERE, message);
             return;
         }

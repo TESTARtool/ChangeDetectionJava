@@ -4,12 +4,12 @@ import java.util.*;
 
 public class Application {
     private String name;
-    private int version;
+    private String version;
     private ModelIdentifier abstractIdentifier;
     private Set<AbstractStateId> states;
     private SortedSet<String> attributes;
 
-    public Application(String name, int version){
+    public Application(String name, String version){
         this.name = name;
         this.version = version;
         this.states = new HashSet<>();
@@ -19,7 +19,7 @@ public class Application {
     public String getName(){
         return name;
     }
-    public int getVersion(){
+    public String getVersion(){
         return version;
     }
 
