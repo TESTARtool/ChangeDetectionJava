@@ -7,13 +7,10 @@ import modeldifference.htmloutput.IStateModelDifferenceJsonWidget;
 import modeldifference.htmloutput.StateModelDifferenceJsonWidget;
 import modeldifference.orient.*;
 import modeldifference.orient.query.*;
-import org.fruit.alayer.IStateManagementTags;
-import org.fruit.alayer.IUIAMapping;
-import org.fruit.alayer.IWdMapping;
-import org.fruit.alayer.StateManagementTags;
 import org.fruit.alayer.webdriver.enums.WdMapping;
 import org.fruit.alayer.windows.UIAMapping;
 import application.settings.*;
+import es.upv.staq.testar.StateManagementTags;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,9 +28,9 @@ public class Program {
 
         var serviceProviderBuilder = new ServiceProviderBuilder()
             .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
-            .addSingleton(IWdMapping.class, WdMapping.class)
-            .addSingleton(IUIAMapping.class, UIAMapping.class)
-            .addSingleton(IStateManagementTags.class, StateManagementTags.class )
+            .addSingleton(WdMapping.class, WdMapping.class)
+            .addSingleton(UIAMapping.class, UIAMapping.class)
+            .addSingleton(StateManagementTags.class, StateManagementTags.class )
             .addSingleton(ISettingProvider.class, settingsProvider)
             .addSingleton(IOrientDbFactory.class, OrientDbFactory.class)
             .addSingleton(IModelApplicationBuilder.class, OrientDbApplicationBuilder.class)

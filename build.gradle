@@ -8,6 +8,7 @@ version '1.1.0'
 
 repositories {
     mavenCentral()
+    maven {url "https://jitpack.io"}
 }
 
 dependencies {
@@ -20,6 +21,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'com.google.guava:guava:26.0-jre'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    implementation 'com.github.TESTARtool:TESTAR_dev:v2.3.4'
 }
 
 test {

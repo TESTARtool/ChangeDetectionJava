@@ -1,22 +1,20 @@
 package modeldifference.htmloutput;
 
 import com.google.common.collect.Sets;
+
 import es.upv.staq.testar.StateManagementTags;
 import modeldifference.IOutputDifferences;
 import modeldifference.calculator.ApplicationDifferences;
 import modeldifference.calculator.StateModelDifferenceImages;
 import modeldifference.models.AbstractAction;
 import modeldifference.models.AbstractState;
+
 import org.fruit.Pair;
-import org.fruit.alayer.IStateManagementTags;
-import org.fruit.alayer.IUIAMapping;
-import org.fruit.alayer.IWdMapping;
 import org.fruit.alayer.Tag;
 import org.fruit.alayer.webdriver.enums.WdMapping;
 import org.fruit.alayer.windows.UIAMapping;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,12 +24,12 @@ import java.util.stream.Collectors;
 public class HtmlOutput implements IOutputDifferences {
 
     public final static String CHARSET = "UTF-8";
-    private final IUIAMapping uiaMapping;
-    private final IWdMapping wdMapping;
-    private final IStateManagementTags stateManagementTags;
+    private final UIAMapping uiaMapping;
+    private final WdMapping wdMapping;
+    private final StateManagementTags stateManagementTags;
     private final IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget;
 
-    public HtmlOutput(IUIAMapping uiaMapping, IWdMapping wdMapping, IStateManagementTags stateManagementTags, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget){
+    public HtmlOutput(UIAMapping uiaMapping, WdMapping wdMapping, StateManagementTags stateManagementTags, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget){
         this.uiaMapping = uiaMapping;
         this.wdMapping = wdMapping;
         this.stateManagementTags = stateManagementTags;
@@ -109,15 +107,13 @@ public class HtmlOutput implements IOutputDifferences {
         var tags = new HashSet<Tag<?>>();
 
         mangementTags.stream()
-                .map(x -> uiaMapping.getMappedStateTag(x))
-                .filter(Optional::isPresent)
-                .map(x -> (Tag<?>) x.get())
+                .map(x -> uiaMapping.getMappedStateTag((Tag)x))
+                .map(x -> (Tag<?>) x)
                 .forEach(tags::add);
 
         mangementTags.stream()
-                .map(x -> wdMapping.getMappedStateTag(x))
-                .filter(x -> x.isPresent())
-                .map(x -> (Tag<?>) x.get())
+                .map(x -> wdMapping.getMappedStateTag((Tag)x))
+                .map(x -> (Tag<?>) x)
                 .forEach(tags::add);
 
         return tags;
