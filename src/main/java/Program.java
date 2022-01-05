@@ -14,6 +14,7 @@ import org.fruit.alayer.StateManagementTags;
 import org.fruit.alayer.webdriver.enums.WdMapping;
 import org.fruit.alayer.windows.UIAMapping;
 import application.settings.*;
+import tryouts.TryOutApplication;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,9 +26,6 @@ public class Program {
         var settingsProvider = new SettingsProviderBuilder()
                 .add(new ArgumentSettingsParser(args))
                 .buildSettingsProvider();
-
-        var isHelpQuested = settingsProvider.containsSetting("help");
-        var isHelpQuested2 = settingsProvider.containsSetting("-help");
 
         var serviceProviderBuilder = new ServiceProviderBuilder()
             .addSingleton(IStateModelDifferenceJsonWidget.class, StateModelDifferenceJsonWidget.class)
@@ -47,11 +45,13 @@ public class Program {
             .addSingleton(IWidgetTreeQuery.class, WidgetTreeQuery.class)
             ;
 
-        if (isHelpQuested || isHelpQuested2){
+        if (isModePresent(settingsProvider,"help")){
             serviceProviderBuilder.addSingleton(IApplication.class, HelpApplication.class);
         }
-        else
-        {
+        else if (isModePresent(settingsProvider, "tryout")){
+            serviceProviderBuilder.addSingleton(IApplication.class, TryOutApplication.class);
+        }
+        else {
             serviceProviderBuilder.addSingleton(IApplication.class, ModelDifferenceApplication.class);
         }
 
@@ -64,5 +64,9 @@ public class Program {
         catch (Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    private static boolean isModePresent(ISettingProvider settingProvider, String mode){
+        return settingProvider.containsSetting(mode) ||  settingProvider.containsSetting("-" + mode);
     }
 }
